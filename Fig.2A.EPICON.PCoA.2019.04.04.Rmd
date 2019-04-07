@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/4/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE}
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+library(vegan)
+library(ggplot2)
+library(colorRamps)
+library(ape)
+
+set.seed(315)
+fung.pc<-pcoa(vegdist(decostand(fung.rar,"hellinger"),"bray"))
+envpc<-data.frame(fung.pc$vectors, env)
+
+pc1=round(fung.pc$values$Relative_eig[1], 3)*100
+pc2=round(fung.pc$values$Relative_eig[2], 3)*100
+
+envpc$Habitat<-factor(envpc$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil") )
+envpc$Treatment1<-factor(envpc$Treatment1, levels = c("Control", "Pre_flowering_drought", "Post_flowering_drought"), labels = c("CON", "PRE", "POST") )
+
+
+```
+
+
+```{r, fig.height = 6, fig.width = 10}
+ggplot() + geom_point(data=envpc,aes(x= Axis.1 , y= Axis.2,shape=Habitat, colour=factor(TP)),size=2) + 
+  labs(x = sprintf("PCo1 (%.1f%%)", pc1), y = sprintf("PCo2 (%.1f%%)", pc2))+
+  scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_colour_manual(values=blue2red(18))+theme_bw()+
+  guides(color=guide_legend(title= "Week"),
+         shape=guide_legend(title= "Compartment"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+```
+
+
+```{r, fig.height = 3, fig.width = 6}
+
+
+ggplot() + geom_point(data=envpc[envpc$TP<2 &envpc$Treatment1=="CON",],aes(x= Axis.1 , y= Axis.2,shape=Habitat, colour=factor(TP)),size=2) + 
+  labs(x = sprintf("PCo1"), y = sprintf("PCo2"))+
+  scale_shape_manual(values=c(3,17,16, 15))+
+  scale_colour_manual(values=c("blue", "red", "brown"))+theme_bw()+
+  guides(color=guide_legend(title= "Week"),
+         shape=guide_legend(title= "Compartment"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+
+
+
+
+```
+
+
+
+```{r, fig.height = 3, fig.width = 7}
+subs<-((envpc$TP == 8  & envpc$Treatment1 != "POST") | 
+         (envpc$TP == 17 & envpc$Treatment1 != "PRE")) & 
+  (envpc$Habitat=="Root" | envpc$Habitat =="Rhizosphere")
+ggplot() + geom_point(data=envpc[subs,],aes(x= Axis.1 , y= Axis.2,shape=factor(TP), colour=Treatment1),size=3,alpha = 0.6) + 
+  labs(x = sprintf("PCo1"), y = sprintf("PCo2"))+
+  scale_colour_manual(values=c("black", "blue", "red"))+theme_bw()+
+  facet_wrap(~Habitat,scales="free", nrow=1)+
+  guides(color=guide_legend(title= "Treatment"),
+         shape=guide_legend(title= "Week"))+
+  theme(strip.text.x = element_text(size = 15,face="bold"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+```
+

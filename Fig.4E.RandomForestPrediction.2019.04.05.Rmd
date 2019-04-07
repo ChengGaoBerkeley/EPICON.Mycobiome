@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/5/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2.5, fig.width = 11, fig.align = "center"}
+library(tidyverse)
+library(reshape2)
+library(forcats)
+library(randomForest)
+library(lubridate)
+library(vegan)
+library(broom)
+library(biobroom)
+library(pheatmap)
+library(splitstackshape)
+library(caTools)
+library(colorRamps)
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+tc_map<-env
+
+otu_table<-data.frame(t(fung.raw))##Read in the raw data###
+
+
+ID$newID<-paste(ID$Guild, ID$Phylum, ID$Class, ID$Order, ID$Family, ID$Genus,ID$aa, sep="_")
+row.names(otu_table)<-ID$newID
+otu_table<-otu_table[ID$Fungi=="Fungi",]
+
+dataset<-data.frame(tc_map$TP, tc_map$Habitat, tc_map$Treatment1,t(otu_table))
+
+rfprect<-function(habitat) {
+  pre<-dataset[dataset$tc_map.Habitat == habitat & dataset$tc_map.Treatment1 == "Pre_flowering_drought" & dataset$tc_map.TP>0, ]
+  post<-dataset[dataset$tc_map.Habitat == habitat & dataset$tc_map.Treatment1 == "Post_flowering_drought"& dataset$tc_map.TP>0, ]
+  ck<-dataset[dataset$tc_map.Habitat == habitat & dataset$tc_map.Treatment1 == "Control"& dataset$tc_map.TP>0, ]
+  set.seed(315)
+  split = sample.split(ck$tc_map.TP, SplitRatio = 0.5)
+  ck.training_set = subset(ck, split == TRUE)
+  ck.test_set = subset(ck, split == FALSE)
+  rf = randomForest(ck.training_set[,c(-1:-3)], factor(ck.training_set[,1]), importance=TRUE, proximity=TRUE, ntree = 1000)
+  rf.ck<-data.frame(predict(rf, ck.test_set))
+  rf.ck<-data.frame("Sample"=row.names(rf.ck),"Prediction"=rf.ck[,1])
+  rf.ck<-data.frame("Sample_time" = as.numeric(substring(rf.ck$Sample, 3, 4)), "Predicted_time"=as.numeric(rf.ck$Prediction))
+  rf.ck$Treatment="Control"
+  rf.pr<-data.frame(predict(rf, pre))
+  rf.pr<-data.frame("Sample"=row.names(rf.pr),"Prediction"=rf.pr[,1])
+  rf.pr<-data.frame("Sample_time" = as.numeric(substring(rf.pr$Sample, 3, 4)), "Predicted_time"=as.numeric(rf.pr$Prediction))
+  rf.pr$Treatment="Pre_flowering_drought"
+  rf.po<-data.frame(predict(rf, post))
+  rf.po<-data.frame("Sample"=row.names(rf.po),"Prediction"=rf.po[,1])
+  rf.po<-data.frame("Sample_time" = as.numeric(substring(rf.po$Sample, 3, 4)), "Predicted_time"=as.numeric(rf.po$Prediction))
+  rf.po$Treatment="Post_flowering_drought"
+  rf.prediction<<-rbind(rf.ck, rf.pr, rf.po)
+  rf.prediction$Habitat<<-habitat
+}
+
+
+
+
+rfprect("Leaf")
+rf.prediction.Leaf<-rf.prediction
+
+rfprect("Root")
+rf.prediction.Root<-rf.prediction
+
+rfprect("Rhizosphere")
+rf.prediction.Rhizosphere<-rf.prediction
+
+rfprect("Soil")
+rf.prediction.Soil<-rf.prediction
+
+
+rf.prediction<-rbind(rf.prediction.Leaf, rf.prediction.Root, rf.prediction.Rhizosphere, rf.prediction.Soil)
+library(colorRamps)
+rf.prediction$Habitat<-factor(rf.prediction$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+rf.prediction$Treatment<-factor(rf.prediction$Treatment, levels = c("Control", "Pre_flowering_drought", "Post_flowering_drought"))
+ggplot() + geom_jitter(data=rf.prediction,  height = 0, 
+                       aes(x= Sample_time, y=Predicted_time, color = Treatment, shape = Treatment) , alpha = 0.5, size =3) + 
+  geom_smooth(data=rf.prediction,aes(x= Sample_time, y=Predicted_time, color = Treatment))+
+  labs(x = "Sample time",y = "Predicted time")+
+  geom_abline(slope=1, intercept=0, color="white")+
+  xlim(0,17)+ylim(0,17)+ theme_bw()+
+  scale_color_manual(values=c("black", "blue", "red"))+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'top')+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+
+
+ggplot() + geom_jitter(data=rf.prediction,  height = 0, 
+                       aes(x= Sample_time, y=Predicted_time, color = Treatment, shape = Treatment) , alpha = 0.5, size =3) + 
+  geom_smooth(data=rf.prediction,aes(x= Sample_time, y=Predicted_time, color = Treatment))+
+  labs(x = "Sample time",y = "Predicted time")+
+  geom_abline(slope=1, intercept=0, color="white")+
+  xlim(0,17)+ylim(0,17)+ theme_bw()+
+  guides(color=FALSE, shape = FALSE)+
+  scale_color_manual(values=c("black", "blue", "red"))+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'top')+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+```
+

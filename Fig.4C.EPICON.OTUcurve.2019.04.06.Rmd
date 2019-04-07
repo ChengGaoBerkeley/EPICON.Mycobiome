@@ -1,0 +1,58 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/6/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 3.5, fig.width = 10}
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+library(vegan)
+library(ggplot2)
+library(reshape2)
+library(splitstackshape)
+
+fung.sub<-fung.rar[,c("OTU16_Fusarium","OTU18_Gibberella","OTU19_Sarocladium","OTU32_Fusarium")]
+env.sub<-data.frame(lev=interaction(env[,c("Habitat","Treatment1","TP", "Cultivar")],sep = ":"))
+otuenv.sub<-data.frame(env.sub,fung.sub)
+
+otuenv.sub2 <- melt(otuenv.sub,id.vars = "lev")
+otuenv.sub3<-cSplit(otuenv.sub2, "lev", ":")
+names(otuenv.sub3)<-c("OTU", "Abundance", "Habitat", "Treatment", "TP", "Cultivar")
+
+otuenv.sub3$Abundance<-as.numeric(otuenv.sub3$Abundance)
+otuenv.sub3$TP<-as.numeric(otuenv.sub3$TP)
+otuenv.sub3$Habitat<-factor(otuenv.sub3$Habitat, levels= c("Leaf", "Root", "Rhizosphere", "Soil"))
+otuenv.sub3<-otuenv.sub3[otuenv.sub3$Habitat=="Root" | otuenv.sub3$Habitat=="Rhizosphere",]
+ggplot(otuenv.sub3, aes(x=TP, y=Abundance, color=Treatment)) +
+  geom_smooth()+
+  facet_grid(Habitat~OTU, scales="free_y")+
+  labs(x="Week",y = "Abundance")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+
+ggplot(otuenv.sub3, aes(x=TP, y=Abundance, color=Treatment)) +
+  geom_smooth()+
+  facet_grid(Habitat~OTU, scales="free_y")+
+  labs(x="Week",y = "Abundance")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+```
+
