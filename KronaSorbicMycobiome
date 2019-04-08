@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ktImportText Sorghum.guild.txt
+
