@@ -1,0 +1,114 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "9/10/2018"
+output: html_document
+---
+```{r, message=FALSE, warning=FALSE}
+setwd("/Users/chengg/Google Drive/Soft tutotials/R/Edward 2018")
+
+library(dplyr)
+library(tidyverse)
+library(betapart)
+library(vegan)
+library(colorRamps)
+
+
+#### 2014 ###
+
+Y45 <- readRDS("cal_ark_data.rds")
+
+Y45a<-Y45[,c(1:11, 13,15)]
+
+#levels(factor(Y2a$variable))
+#tax$Timepoint
+
+Y45spr <- Y45a %>%
+  spread(variable, value)
+
+
+Y14<-Y45spr[Y45spr$Site=="Arbuckle" &Y45spr$Compartment=="Endosphere" & Y45spr$Season =="2014" ,]
+#gap_medium$Genotype
+
+
+env<-Y14[, 1:11]
+com<-Y14[, -1:-11]
+com[com>0]=1 
+fd<-beta.pair(com, index.family = "jaccard")
+jtu<-fd$beta.jtu
+bd<-betadisper(jtu,factor(env$Age))
+print (anova(bd)); 
+boxplot(bd)
+plot(bd, col=blue2red(19), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(19), main="", xlab="PC1", ylab="PC2")
+
+jac<-fd$beta.jac
+bd<-betadisper(jac,factor(env$Age))
+print (anova(bd)); 
+boxplot(bd)
+plot(bd, col=blue2red(19), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(19), main="", xlab="PC1", ylab="PC2")
+
+#### 2015 ###
+
+
+Y15<-Y45spr[Y45spr$Site=="Arbuckle" & Y45spr$Compartment=="Endosphere" & Y45spr$Season =="2015" & Y45spr$Age >4 ,]
+env<-Y15[, 1:11]
+com<-Y15[, -1:-11]
+com[com>0]=1 
+fd<-beta.pair(com, index.family = "jaccard")
+jtu<-fd$beta.jtu
+bd<-betadisper(jtu,factor(env$Age))
+print (anova(bd)); 
+boxplot(bd)
+plot(bd, col=blue2red(17), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(17), main="", xlab="PC1", ylab="PC2")
+
+jac<-fd$beta.jac
+bd<-betadisper(jac,factor(env$Age))
+print (anova(bd)); 
+boxplot(bd)
+plot(bd, col=blue2red(19), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(19), main="", xlab="PC1", ylab="PC2")
+
+
+#### 2016 #
+Y16 <- readRDS("cal_2016.rds")
+
+Y16 <-Y16[,c(1:10, 13,14)]
+#head(tax[1:5, 1:15])
+#levels(factor(tax$value))
+#tax$Timepoint
+
+Y16 <- Y16 %>%
+  spread(variable, value)
+
+Y16<-Y16[Y16$Compartment=="Endosphere" ,]
+#gap_medium$Genotype
+env<-Y16[, 1:10]
+com<-Y16[, -1:-10]
+
+com[com>0]=1 
+fd<-beta.pair(com, index.family = "jaccard")
+jtu<-fd$beta.jtu
+bd<-betadisper(jtu,factor(env$Timepoint))
+print (anova(bd)); 
+boxplot(bd)
+
+plot(bd, col=blue2red(9), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(9), main="", xlab="PC1", ylab="PC2")
+
+
+jac<-fd$beta.jac
+bd<-betadisper(jac,factor(env$Timepoint))
+print (anova(bd)); #print(adonis(fung.dist~envx$Timepoint))
+plot(bd, col=blue2red(9), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(9), main="", xlab="PC1", ylab="PC2")
+
+```
