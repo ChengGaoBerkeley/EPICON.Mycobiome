@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/9/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 6, fig.align = "center"}
+
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+library(vegan)
+library(colorRamps)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+MNTD.L<-read.csv("betaMNTD_weighted.Leaf.tedTree.csv", head = T, row.names =1)
+MNTD.L<-as.dist(MNTD.L)
+MNTD.L.01<-(MNTD.L-min(MNTD.L))/(max(MNTD.L)-min(MNTD.L))
+
+envL<-env[env$Habitat=="Leaf",]
+bd.MNTD.L<-betadisper(MNTD.L.01,envL$TP)
+plot(bd.MNTD.L, col=blue2red(17), 
+     hull = FALSE,cex = 0.8,label.cex = 0.8,
+     seg.col=blue2red(17), main=" ", xlab="PC1", ylab="PC2")
+
+
+```
+

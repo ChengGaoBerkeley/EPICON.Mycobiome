@@ -1,0 +1,151 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/7/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2.5, fig.width = 11}
+library(tidyverse)
+library(reshape2)
+library(forcats)
+library(randomForest)
+library(lubridate)
+library(vegan)
+library(broom)
+library(biobroom)
+library(pheatmap)
+library(splitstackshape)
+library(caTools)
+library(colorRamps)
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+
+
+fungS<-fung.raw[env$Habitat=="Soil",]
+fungS<-fungS[,colSums(fungS)>0]
+
+fungR<-fung.raw[env$Habitat=="Root",]
+fungR<-fungR[,colSums(fungR)>0]
+
+fungZ<-fung.raw[env$Habitat=="Rhizosphere",]
+fungZ<-fungZ[,colSums(fungZ)>0]
+
+fL<-fung.raw[env$Habitat=="Leaf",]
+fL<-fL[,colSums(fL)>0]
+
+sac<-specaccum(fung.raw)
+sac.all<-data.frame(cbind(sac$sites, sac$richness, sac$sd))
+sac.all$Group<-"All"
+
+sac<-specaccum(fungS)
+sac.S<-data.frame(cbind(sac$sites, sac$richness, sac$sd))
+sac.S$Group<-"Soil"
+
+sac<-specaccum(fungR)
+sac.R<-data.frame(cbind(sac$sites, sac$richness, sac$sd))
+sac.R$Group<-"Root"
+
+sac<-specaccum(fungZ)
+sac.Z<-data.frame(cbind(sac$sites, sac$richness, sac$sd))
+sac.Z$Group<-"Rhizosphere"
+
+sac<-specaccum(fL)
+sac.L<-data.frame(cbind(sac$sites, sac$richness, sac$sd))
+sac.L$Group<-"Leaf"
+sac<-rbind(sac.all, sac.L, sac.Z, sac.R, sac.S)
+sac$Group<-factor(factor(sac$Group), levels = c("All","Leaf", "Root", "Rhizosphere", "Soil"))
+names(sac)<-c("No.Samples", "No.Species", "SD","Group")
+ggplot()+theme_bw() +ylim(0,1200)+
+  geom_line(data=sac,aes(x= No.Samples,  y=No.Species, color=Group), size =2)+
+  geom_line(data=sac,aes(x= No.Samples,  y=No.Species+SD, color=Group), linetype=3, size =1)+
+  geom_line(data=sac,aes(x= No.Samples,  y=No.Species-SD, color=Group), linetype=3, size =1)+
+  facet_wrap(~Group, ncol = 5, scales = "free_x")+
+  labs(x="Number of samples",y = "Number of species")+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+
+fung.raw01<-fung.raw
+fung.raw01[fung.raw01>0]<-1
+
+fungS<-fung.raw[env$Habitat=="Soil" & env$TP>0,]
+fungS<-fungS[,colSums(fungS)>0]
+fungS[fungS>0]<-1
+
+fungR<-fung.raw[env$Habitat=="Root",]
+fungR<-fungR[,colSums(fungR)>0]
+fungR[fungR>0]<-1
+
+fungZ<-fung.raw[env$Habitat=="Rhizosphere",]
+fungZ<-fungZ[,colSums(fungZ)>0]
+fungZ[fungZ>0]<-1
+
+fL<-fung.raw[env$Habitat=="Leaf",]
+fL<-fL[,colSums(fL)>0]
+fL[fL>0]<-1
+
+freq.L<-data.frame(colSums(fL))
+freq.L$d1<-1
+freq.L$Group<-"All"
+names(freq.L)<-c("Occurence", "Lpecies", "Time")
+d.L<-aggregate(freq.L$Lpecies, by=list(Occurence=freq.L$Occurence), FUN=sum)
+d.L<-d.L[d.L$Occurence>0,]
+d.L$Group<-"Leaf"
+
+freq.R<-data.frame(colSums(fungR))
+freq.R$d1<-1
+freq.R$Group<-"All"
+names(freq.R)<-c("Occurence", "Species", "Time")
+d.R<-aggregate(freq.R$Species, by=list(Occurence=freq.R$Occurence), FUN=sum)
+d.R<-d.R[d.R$Occurence>0,]
+d.R$Group<-"Root"
+
+freq.Z<-data.frame(colSums(fungZ))
+freq.Z$d1<-1
+freq.Z$Group<-"All"
+names(freq.Z)<-c("Occurence", "Species", "Time")
+d.Z<-aggregate(freq.Z$Species, by=list(Occurence=freq.Z$Occurence), FUN=sum)
+d.Z<-d.Z[d.Z$Occurence>0,]
+d.Z$Group<-"Rhizosphere"
+
+freq.S<-data.frame(colSums(fungS))
+freq.S$d1<-1
+freq.S$Group<-"All"
+names(freq.S)<-c("Occurence", "Species", "Time")
+d.S<-aggregate(freq.S$Species, by=list(Occurence=freq.S$Occurence), FUN=sum)
+d.S<-d.S[d.S$Occurence>0,]
+d.S$Group<-"Soil"
+
+
+freq.all<-data.frame(colSums(fung.raw01))
+freq.all$d1<-1
+freq.all$Group<-"All"
+names(freq.all)<-c("Occurence", "Species", "Time")
+d.all<-aggregate(freq.all$Species, by=list(Occurence=freq.all$Occurence), FUN=sum)
+d.all<-d.all[d.all$Occurence>0,]
+d.all$Group<-"All"
+
+d.c<-rbind( d.L, d.Z, d.R, d.S, d.all)
+names(d.c)<-c("Number_of_Occurences", "Number_of_Species", "Group")
+d.c$Group<-factor(factor(d.c$Group), levels = c("All","Leaf", "Root", "Rhizosphere", "Soil"))
+ggplot(d.c, aes(Number_of_Occurences, Number_of_Species)) +theme_bw()+ 
+  labs(x="Number of occurences",y = "Number of species")+
+  facet_wrap(~Group, ncol = 5, scales = "free_x")+
+  geom_bar(aes(fill = Group), position = "dodge", stat="identity", width=1)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+```
+

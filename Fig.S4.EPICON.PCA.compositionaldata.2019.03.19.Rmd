@@ -1,0 +1,79 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "3/19/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE}
+###PCA of CLR##
+
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+library(compositions)
+library(zCompositions)
+source("codaSeq_functions.R")
+library(vegan)
+library(ggplot2)
+library(colorRamps)
+library(plyr)
+
+env<-env0
+
+gr<-fung0$Fungi=="Fungi"
+otu_table0<-data.frame(fung0[gr ,c(1:1251) ]) ### raw data of all samples including pseudo samples #
+ID<-data.frame(fung0[gr ,c(-1:-1251) ]) ### raw data of all samples including pseudo samples #
+
+row.names(otu_table0)<-row.names(ID)
+otu_table1<-data.frame(t(otu_table0[ID$Kingdom=="Fungi",]))
+env0$Treatment1<-factor(env0$Treatment1,levels=c("Control", "Pre_flowering_drought", "Post_flowering_drought"))
+
+subs<-env$Habitat!="Prop_root"
+otu<-otu_table1[subs, ]
+env1<-env0[subs, ]
+
+
+d.n0 <- cmultRepl(otu, label=0, method="CZM", output="counts")
+d.n0.clr <- codaSeq.clr(d.n0, samples.by.row=TRUE)
+
+pcx <- prcomp(d.n0.clr)
+mvar.clr <- mvar(d.n0.clr)
+
+
+xxxx<-summary(pcx)
+yy<-xxxx$importance
+
+#write.csv(yy,"yy.csv")
+sum(xxxx$importance)
+pc1=round(sum(pcx$sdev[1]^2)/mvar.clr, 3)*100
+pc2=round(sum(pcx$sdev[2]^2)/mvar.clr, 3)*100
+
+envpc<-data.frame(pcx$x, env1)
+
+```
+
+
+```{r, fig.height = 7, fig.width = 10}
+df <- envpc[,c("PC1", "PC2", "Habitat")]
+find_hull <- function(envpc) envpc[chull(envpc$PC1, envpc$PC2), ]
+hulls <- ddply(df, "Habitat", find_hull)
+
+ggplot(data=envpc, aes(x= PC1 * -1 , y= PC2 * -1,group=Habitat))+ 
+  geom_point(aes(shape=Habitat, colour=factor(TP)),size=2) + 
+  geom_polygon(data=hulls, alpha=.1)+
+  labs(x = sprintf("PC1 (%.1f%%)", pc1), y = sprintf("PC2 (%.1f%%)", pc2))+
+  scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_colour_manual(values=blue2red(18))+theme_bw()+
+  guides(color=guide_legend(title= "Week"),
+         shape=guide_legend(title= "Compartment"))+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+```
+

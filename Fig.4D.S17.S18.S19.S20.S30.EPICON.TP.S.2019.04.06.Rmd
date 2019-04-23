@@ -1,0 +1,156 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/6/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2.5, fig.width = 11, fig.align = "center"}
+
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+library(vegan)
+library(ggplot2)
+
+env$S.rar362<-specnumber(fung.rar)
+env$H<-diversity(fung.rar)
+env$J<-env$H/log(env$S)
+# TP ~ richness
+#env.L$Treatment1<-factor(env.L$Treatment1, levels= c("Control", "Pre_flowering_drought", "Post_flowering_drought"))
+env$Habitat<-factor(env$Habitat, levels= c("Leaf", "Root", "Rhizosphere", "Soil"))
+ggplot(env, aes(x=factor(TP), y=S.rar362, color=Treatment1)) +
+  geom_boxplot()+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'top')+
+  labs(x="Week",y = "Richness")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+
+
+ggplot(env, aes(x=factor(TP), y=J, color=Treatment1)) +
+  geom_boxplot()+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'top')+
+  labs(x="Week",y = "Evenness")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+
+ggplot(env, aes(x=factor(TP), y=Fungi.pct, color=Treatment1)) +
+  geom_boxplot()+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'top')+
+  labs(x="Week",y = "Fungal ITS2 amplicon %")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 3, fig.width = 6, fig.align = "center"}
+ggplot(env[env$qPCR>0,], aes(x=factor(TP), y= log(qPCR+1), color=Treatment1)) +
+  geom_boxplot()+
+  facet_wrap(~Habitat, ncol = 2,strip.position= 'top')+
+  labs(x="Week",y = "Log(Fungal 18S qPCR %)")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+env.Tra$transcrib.pct<-rowSums(env.Tra[, c(12:20,22:24)]) / rowSums(env.Tra[, c(12:24)])
+ggplot(env.Tra, aes(x=factor(TP), y= log(transcrib.pct), color=Treatment)) +
+  geom_boxplot()+
+  facet_wrap(~Habitat, ncol = 2,strip.position= 'top')+
+  labs(x="Week",y = "Log(Fungal transcription %)")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 5, fig.align = "center"}
+###################
+ggplot(env[env$qPCR>0,], aes(x= log(qPCR),  y = Fungi.pct, color = Habitat)) +
+  geom_point()+geom_smooth()+
+  labs(x="Community size: Log (fungal 18S qPCR)", y = "Community size: fungal ITS2 amplicon %")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+cor.test(log(env[env$qPCR>0,]$qPCR), env[env$qPCR>0,]$Fungi.pct)
+
+
+#####
+ggplot(env.Tra, aes(x= log(transcrib.pct), y = Fungi.pct.x, color = Habitat)) +
+  geom_point()+geom_smooth()+
+  labs( x = "Community size: Log(fungal transcription %)",y="Community size: fungal ITS2 amplicon %")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+cor.test(log(env.Tra$transcrib.pct), env.Tra$Fungi.pct.x)
+
+##########
+ggplot(env.Tra[env.Tra$qPCR>0,], aes(x= log(transcrib.pct), y = qPCR, color = Habitat)) +
+  geom_point()+geom_smooth()+
+  labs(x = "Community size: Log(fungal transcription %)", y="Community size: Log(fungal 18S qPCR)")+
+  scale_color_manual(values=c("black","red", "blue"))+
+  theme_bw()+
+  guides(color=FALSE)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+cor.test(log(env.Tra[env.Tra$qPCR>0,]$transcrib.pct), log(env.Tra[env.Tra$qPCR>0,]$qPCR))
+```
+

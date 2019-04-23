@@ -1,0 +1,1023 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "3/17/2019"
+output: html_document
+---
+
+```{r}
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+library(ggplot2)
+library(nlme)
+library(MuMIn)
+```
+
+
+```{r, fig.height = 3.5, fig.width = 12, fig.align = "center"}
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+col11<-c("#0000FF","#FF3399","#FFCC33","#ff00ff","#00ff00", "deepskyblue", "bisque",   "darkgreen","black", "maroon3",   "grey")
+# bNTI.ted2RC95pct.ted
+bNTI.ted.RC.part.TP.TREAT$Treatment<-factor(bNTI.ted.RC.part.TP.TREAT$Treatment, levels= c("Control", "Pre_flowering_drought", "Post_flowering_drought"), labels = c("CON", "PRE", "POST"))
+bNTI.ted.RC.part.TP.TREAT$Habitat<-factor(bNTI.ted.RC.part.TP.TREAT$Habitat, levels= c("Leaf", "Root", "Rhizosphere", "Soil"), labels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+bNTI.ted.RC.part.TP.TREAT$bNTI.ted.RC.partition<-factor(bNTI.ted.RC.part.TP.TREAT$bNTI.ted.RC.partition,
+                                                            labels = c("(-2, 2)   & [-1, -0.95]", "(-2, 2)   & (-0.95, 0.95)",  "(-2, 2)   & [0.95, 1]",   "[2, +∞)  & [0.95, 1]",  "[2, +∞)  & (-0.95, 0.95)"  ,  "[2, +∞)  & [-1, -0.95]" ,  "(-∞, -2] & [0.95, 1]" ,  "(-∞, -2] & (-0.95, 0.95)", "(-∞, -2] & [-1, -0.95]"))
+
+ggplot(bNTI.ted.RC.part.TP.TREAT[bNTI.ted.RC.part.TP.TREAT$Treatment=="CON",], aes(x = factor(TP), y = Value ,fill=bNTI.ted.RC.partition)) +
+  geom_bar(stat='identity', position = "fill")+  ###add <   > for relative abundance
+  labs(x="Week",y = "Relative importance")+
+  facet_wrap(~Habitat, ncol = 4,strip.position= 'left')+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))+
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values= col11) + guides(fill=FALSE)
+```
+
+
+```{r, fig.height = 5, fig.width = 15, fig.align = "center"}
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+col11<-c("#0000FF","#FF3399","#FFCC33","#ff00ff","#00ff00", "deepskyblue", "bisque",   "darkgreen","black", "maroon3",   "grey")
+# bNTI.ted2RC95pct.ted
+bNTI.ted.RC.part.TP.TREAT$Treatment<-factor(bNTI.ted.RC.part.TP.TREAT$Treatment, levels= c("Control", "Pre_flowering_drought", "Post_flowering_drought"), labels = c("CON", "PRE", "POST"))
+bNTI.ted.RC.part.TP.TREAT$Habitat<-factor(bNTI.ted.RC.part.TP.TREAT$Habitat, levels= c("Leaf", "Root", "Rhizosphere", "Soil"), labels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+bNTI.ted.RC.part.TP.TREAT$bNTI.ted.RC.partition<-factor(bNTI.ted.RC.part.TP.TREAT$bNTI.ted.RC.partition,
+                                                            labels = c("(-2, 2)   & [-1, -0.95]", "(-2, 2)   & (-0.95, 0.95)",  "(-2, 2)   & [0.95, 1]",   "[2, +∞)  & [0.95, 1]",  "[2, +∞)  & (-0.95, 0.95)"  ,  "[2, +∞)  & [-1, -0.95]" ,  "(-∞, -2] & [0.95, 1]" ,  "(-∞, -2] & (-0.95, 0.95)", "(-∞, -2] & [-1, -0.95]"))
+ggplot(bNTI.ted.RC.part.TP.TREAT, aes(x = factor(TP), y = Value ,fill=bNTI.ted.RC.partition)) +
+  geom_bar(stat='identity', position = "fill")+  ###add <   > for relative abundance
+  labs(x="Week",y = "Relative importance")+
+  facet_grid(Treatment~Habitat)+
+  labs(fill="       βNTI   &   RCI")+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))+
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values= col11) 
+
+ggplot(bNTI.ted.RC.part.TP.TREAT, aes(x = factor(TP), y = Value ,fill=bNTI.ted.RC.partition)) +
+  geom_bar(stat='identity', position = "fill")+  ###add <   > for relative abundance
+  labs(x="Week",y = "Relative importance")+
+  facet_grid(Treatment~Habitat)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))+
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values= col11) + guides(fill=FALSE)
+
+######RCI alone
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+col11<-c("#0000FF","#FF3399","#FFCC33","#ff00ff","#00ff00", "deepskyblue", "bisque",   "darkgreen","black", "maroon3",   "grey")
+
+RC.part.TP.TREAT$Treatment<-factor(RC.part.TP.TREAT$Treatment, levels= c("Control", "Pre_flowering_drought", "Post_flowering_drought"), labels = c("CON", "PRE", "POST"))
+RC.part.TP.TREAT$Habitat<-factor(RC.part.TP.TREAT$Habitat, levels= c("Leaf", "Root", "Rhizosphere", "Soil"), labels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+RC.part.TP.TREAT$RC.partition<-factor(RC.part.TP.TREAT$RC.partition,
+                                      labels = c("[-1, -0.95]", "(-0.95, 0.95)", "[0.95, 1]"))
+
+ggplot(RC.part.TP.TREAT, aes(x = factor(TP), y = Value ,fill=RC.partition)) +
+  geom_bar(stat='identity', position = "fill")+  ###add <   > for relative abundance
+  labs(x="Week",y = "Relative importance")+
+  facet_grid(Treatment~Habitat)+
+  labs(fill="       RCI")+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))+
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values= col11) 
+
+
+ggplot(RC.part.TP.TREAT, aes(x = factor(TP), y = Value ,fill=RC.partition)) +
+  geom_bar(stat='identity', position = "fill")+  ###add <   > for relative abundance
+  labs(x="Week",y = "Relative importance")+
+  facet_grid(Treatment~Habitat)+
+  theme(strip.text = element_text(size = 15,face="bold"),
+        panel.spacing = unit(0, "lines"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.text.x=element_text(angle = 90),
+        axis.title=element_text(size=15,face="bold"))+
+  scale_y_continuous(labels = scales::percent)+
+  scale_fill_manual(values= col11) + guides(fill=FALSE)
+
+```
+
+
+```{r, fig.height = 3, fig.width = 4, fig.align = "center"}
+##################
+## correlations###
+##################
+
+##### RC.bNTI.ted
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+Lagg$Habitat<-factor(Lagg$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+ggplot(data=Lagg, aes(y=bNTI.ted2RC95pct, x= Fungi.pct/100, color=Habitat, shape =Habitat))+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Fungal ITS2 amplicon %")+ylab("|βNTI|< 2 & |RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  scale_x_continuous(labels = scales::percent)+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+
+ggplot(data=Lagg, aes(y=bNTI.ted2RC95pct, x= Fungi.pct/100, color=Habitat, shape =Habitat))+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Fungal ITS2 amplicon %")+ylab("|βNTI|< 2 & |RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  scale_x_continuous(labels = scales::percent)+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"),
+        legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"))
+lme0<-lme(bNTI.ted2RC95pct~Fungi.pct,random=~1|Habitat,data=Lagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+Traagg$Habitat<-factor(Traagg$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+ggplot(data=Traagg, aes(y=bNTI.ted2RC95pct, x= log(Fungi.pct.tra) , color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Log (fungal transcription %)")+ylab("|βNTI|< 2 & |RCI| < 0.95")+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(bNTI.ted2RC95pct~log(Fungi.pct.tra),random=~1|Habitat,data=Traagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+LaggqPCR$Habitat<-factor(LaggqPCR$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+
+ggplot(data=LaggqPCR, aes(y=bNTI.ted2RC95pct, x= qPCR , color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Log (Fungal 18S qPCR)")+ylab("|βNTI|< 2 & |RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(bNTI.ted2RC95pct~qPCR,random=~1|Habitat,data=LaggqPCR)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+ggplot(data=Lagg, aes(y=bNTI.ted2RC95pct, x= S.rar362, color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span = 0.9)+ geom_point() + theme_bw()+
+  xlab("Fungal richness")+ylab("|βNTI|< 2 & |RCI| < 0.95")+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(bNTI.ted2RC95pct~S.rar362,random=~1|Habitat,data=Lagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+
+# RC95
+ggplot(data=Lagg, aes(y=RC95pct, x= Fungi.pct/100, color=Habitat, shape =Habitat))+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Fungal ITS2 amplicon %")+ylab("|RCI|< 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  scale_x_continuous(labels = scales::percent)+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(RC95pct~Fungi.pct,random=~1|Habitat,data=Lagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+ggplot(data=Traagg, aes(y=RC95pct, x= log(Fungi.pct.tra) , color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Log (fungal transcription %)")+ylab("|RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(RC95pct~log(Fungi.pct.tra),random=~1|Habitat,data=Traagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+ggplot(data=LaggqPCR, aes(y=RC95pct, x= qPCR , color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span=0.9)+ geom_point() + theme_bw()+
+  xlab("Log (Fungal 18S qPCR)")+ylab("|RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(RC95pct~qPCR,random=~1|Habitat,data=LaggqPCR)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+ggplot(data=Lagg, aes(y=RC95pct, x= S.rar362, color=Habitat, shape =Habitat) )+
+  geom_smooth( method="loess", span = 0.9)+ geom_point() + theme_bw()+
+  xlab("Fungal richness")+ylab("|RCI| < 0.95")+
+  scale_color_manual(values = c("deepskyblue","#ff00ff", "gold", "#00ff00"))+ scale_shape_manual(values=c(0, 6, 3, 1))+
+  scale_y_continuous(labels = scales::percent, limits = c(-0.25, 1))+
+  theme(axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=14,face="bold"))+ theme(legend.position = "none")
+lme0<-lme(RC95pct~S.rar362,random=~1|Habitat,data=Lagg)
+summary(lme0)
+anova(lme0)
+r.squaredGLMM(lme0)
+
+```
+
+######DATA PREPARATION RC BNTI tedTREE#####
+
+rm(list = ls())
+
+
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(reshape2)
+library(ggplot2)
+library(MASS)
+library(splitstackshape)
+library(colorRamps)
+library(vegan)
+library(betapart)
+library(ape)
+library(DOC)
+library(ecodist)
+library(gridExtra)
+library(nlme)
+library(MuMIn)
+source("weighted Fst function.r")
+env0<-read.csv("epicon.ENV.2017.12.05.csv", head = T)
+fung0<-read.csv("epicon.ID.mat.2018.06.12.csv", head=T, row.names =1) ##Read in the raw data###
+
+gr<-fung0$AccessionNo!="."
+#gr<-fung0$Phylum=="Basidiomycota"
+
+fungt<-data.frame(fung0[gr ,c(1:1251) ]) ### raw data of all samples including pseudo samples #
+ID<-data.frame(fung0[gr ,c(-1:-1251) ]) ### raw data of all samples including pseudo samples #
+ID1<-data.frame(rownames(ID),ID$Phylum_lifestyle, ID$Phylum)
+#names(ID1)<- c("ID", "Phylum_lifestyle", "Phylum", "Life_style")
+#Flev<-ID$Phylum
+#Flev<-ID$Phylum_lifestyle
+Flev<-rownames(ID);
+taxonomy<-data.frame(ID$Kingdom,ID$Phylum.ab, ID$Class.ab, ID$Order, ID$Family, ID$Genus);
+colnames(taxonomy) = c("kingdom","phylum","class","order","family","genus");
+rownames(taxonomy)<-rownames(ID)
+fung.lev<-data.frame(aggregate(fungt,by=list(Flev) , sum))
+rownames(fung.lev)<-fung.lev[,1]; fung.lev<-fung.lev[match(Flev, fung.lev$Group.1),]
+fung.lev<-fung.lev[,-1]
+fung1<-data.frame(t(fung.lev))
+
+fung.raw.pseudo<-fung1[env0$Habitat!="Prop_root",]  # can be useful for Barplots of total fungi
+env.F.raw.pseudo<-env0[env0$Habitat!="Prop_root",]   # can be useful for Barplots of total fungi
+
+fung.raw<-fung.raw.pseudo[c(1:1026),] ### raw data of all samples #
+env.raw<-env.F.raw.pseudo[c(1:1026),]
+
+cutoff<-362 # the cutoff for rarefaction
+
+fung.rar<-data.frame(rrarefy(fung.raw, cutoff))   
+env<-env.raw[rowSums(fung.rar)==cutoff,]
+fung<-fung.rar[rowSums(fung.rar)==cutoff,colSums(fung.rar)>0]
+fung<-fung[,colSums(fung)>0]
+
+# bNTI.ted
+#phylo = read.tree("tedtree4.txt");
+#phylo; # a summary of the phylogeny
+#plot.phylo(phylo,typ="fan", font =1, cex=1)
+#b#NTI.ted<-read.csv("weighted_bNTI.ted.F.csv", head = T, row.names =1)
+#bNTI.ted<-as.dist(bNTI.ted)
+#bNTI.ted01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+#RC
+rc0<-read.csv("rc.RSZL.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc01<-(rc+1)/2
+
+env.L<-env
+fungL.R362F<-fung
+tmp<-fung ## abudance data
+
+tmp01<-tmp
+tmp01[tmp01>0]=1      # 0 1 data
+env.L$S.rar362<-specnumber(fungL.R362F)
+env.L$H.rar362<-vegan::diversity(fungL.R362F)
+env.L$J.rar362<-env.L$H.rar362/log(env.L$S.rar362)
+env.L$TP1[env.L$TP>7]="Weeks8_17" ; env.L$TP1[env.L$TP<8]="Weeks1_7" # to divide all time points to early and later groups
+env.L$bb<-droplevels(interaction( env.L$Timepiont,env.L$Habitat,env.L$Treatment1,sep = "."))
+env.L$Habitat2<-factor(droplevels(env.L$Habitat), levels=c("Leaf", "Root", "Rhizosphere", "Soil"),
+                       labels = c("L", "R", "Z", "S"))
+env.L$aa1<-paste("TP",env.L$TP, env.L$Habitat2,env.L$plot, sep = "")
+
+env.L$va<-interaction(env.L$TP, env.L$Habitat2)
+
+phylo = read.tree("tedtree4.txt");
+#phylo; # a summary of the phylogeny
+#plot.phylo(phylo,typ="fan", font =1, cex=1)
+#bNTI.ted<-read.csv("weighted_bNTI.ted.F.csv", head = T, row.names =1)
+#bNTI.ted<-as.dist(bNTI.ted)
+#bNTI.ted01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+#RC
+rc0<-read.csv("rc.RSZL.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc01<-(rc+1)/2
+
+env.L$va<-interaction(env.L$TP, env.L$Habitat2)
+fd<-beta.pair(tmp01, index.family = "jaccard")
+bc<-vegdist(tmp)
+bd.rc<-betadisper(rc01,env.L$va)
+env.L$RCdisper<-bd.rc$distances
+bd.bc<-betadisper(bc,env.L$va)
+env.L$bradisper<-bd.bc$distances
+bd.jac<-betadisper(fd$beta.jac,env.L$va)
+env.L$jacdisper<-bd.jac$distances
+bd.jne<-betadisper(fd$beta.jne,env.L$va)
+env.L$jnedisper<-bd.jne$distances
+bd.jtu<-betadisper(fd$beta.jtu,env.L$va)
+env.L$jtudisper<-bd.jtu$distances
+#bd.bNTI.ted01<-betadisper(bNTI.ted01,env.L$va)
+#env.L$bNTI.teddisper<-bd.bNTI.ted01$distances
+
+###################################### 
+# Transcriptome samples level metrics#
+######################################
+
+Tra<-read.csv("LR.mycotranscriptome.csv", head = T)
+
+env.Tra<- merge(Tra,env.L, by.x="aa", by.y="aa1", all =FALSE)
+env.Tra$Pct.Tra<-rowSums(env.Tra[,c(12:20,22:24)])/env.Tra$FilteredReads
+tmp.Tra<-tmp[rownames(tmp) %in% env.Tra$aa,]
+tmp.Tra<-tmp.Tra[colSums(tmp.Tra)>0] ## abudance data
+tmp.Tra01<-tmp.Tra
+tmp.Tra01[tmp.Tra01>0]=1 
+
+###################################### 
+# Metabolome samples level metrics#
+######################################
+
+Met<-read.csv("EPICON.metabolome.csv", head = T)
+env.Tra.Met<-env.Tra[env.Tra$aa %in% Met$aa,]
+Met1<-Met[Met$aa %in% env.Tra.Met$aa,]
+tmp.Tra.Met<-tmp.Tra[rownames(tmp.Tra) %in% env.Tra.Met$aa,]## abudance data
+tmp.Tra.Met01<-tmp.Tra.Met
+tmp.Tra.Met01[tmp.Tra.Met01>0]=1 
+
+##############################################
+## To aggarete variables by TP.TREAT##
+##############################################
+
+bNTI.ted<-read.csv("weighted_bNTI.ted.S.F.csv", head = T, row.names =1)
+bNTI.ted<-as.dist(bNTI.ted)
+bNTI.ted.01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+rc0<-read.csv("rc.S.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc.01<-(rc+1)/2
+
+env.L1<-droplevels(env.L[env.L$Habitat=="Soil",])
+
+t1<-levels(env.L1$bb)
+LbNTI.ted = NULL
+for (i in t1){
+  m1<-as.matrix(bNTI.ted)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  LbNTI.ted<-rbind(LbNTI.ted,m1)
+}
+LbNTI.ted2<-cSplit(LbNTI.ted, "TP.TREAT", ".")
+LbNTI.ted2$TP.TREAT_1<-as.numeric(gsub("TP", "" , LbNTI.ted2$TP.TREAT_1))
+LbNTI.ted.TP.TREAT<-LbNTI.ted2
+names(LbNTI.ted.TP.TREAT)<-c("bNTI.ted", "TP","Habitat", "Treatment")
+LbNTI.ted<-data.frame(LbNTI.ted$TP.TREAT,LbNTI.ted.TP.TREAT)
+names(LbNTI.ted)<-c("TP.TREAT", "bNTI.ted", "TP","Habitat", "Treatment")
+# RC
+t1<-levels(env.L1$bb)
+Lrc = NULL
+for (i in t1){
+  m1<-as.matrix(rc)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  Lrc<-rbind(Lrc,m1)
+}
+Lrc2<-cSplit(Lrc, "TP.TREAT", ".")
+Lrc2$TP.TREAT_1<-as.numeric(gsub("TP", "" , Lrc2$TP.TREAT_1))
+RC.TP.TREAT<-Lrc2
+names(RC.TP.TREAT)<-c("RC", "TP","Habitat", "Treatment")
+Lrc<-data.frame(Lrc$TP.TREAT,Lrc2)
+names(Lrc)<-c("TP.TREAT", "RC", "TP","Habitat", "Treatment")
+LbNTI.ted.S<-LbNTI.ted
+Lrc.S<-Lrc
+
+#
+bNTI.ted<-read.csv("weighted_bNTI.ted.Z.F.csv", head = T, row.names =1)
+bNTI.ted<-as.dist(bNTI.ted)
+bNTI.ted.01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+rc0<-read.csv("rc.Z.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc.01<-(rc+1)/2
+
+env.L1<-droplevels(env.L[env.L$Habitat=="Rhizosphere",])
+
+t1<-levels(env.L1$bb)
+LbNTI.ted = NULL
+for (i in t1){
+  m1<-as.matrix(bNTI.ted)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  LbNTI.ted<-rbind(LbNTI.ted,m1)
+}
+LbNTI.ted2<-cSplit(LbNTI.ted, "TP.TREAT", ".")
+LbNTI.ted2$TP.TREAT_1<-as.numeric(gsub("TP", "" , LbNTI.ted2$TP.TREAT_1))
+LbNTI.ted.TP.TREAT<-LbNTI.ted2
+names(LbNTI.ted.TP.TREAT)<-c("bNTI.ted", "TP","Habitat", "Treatment")
+LbNTI.ted<-data.frame(LbNTI.ted$TP.TREAT,LbNTI.ted.TP.TREAT)
+names(LbNTI.ted)<-c("TP.TREAT", "bNTI.ted", "TP","Habitat", "Treatment")
+# RC
+t1<-levels(env.L1$bb)
+Lrc = NULL
+for (i in t1){
+  m1<-as.matrix(rc)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  Lrc<-rbind(Lrc,m1)
+}
+Lrc2<-cSplit(Lrc, "TP.TREAT", ".")
+Lrc2$TP.TREAT_1<-as.numeric(gsub("TP", "" , Lrc2$TP.TREAT_1))
+RC.TP.TREAT<-Lrc2
+names(RC.TP.TREAT)<-c("RC", "TP","Habitat", "Treatment")
+Lrc<-data.frame(Lrc$TP.TREAT,Lrc2)
+names(Lrc)<-c("TP.TREAT", "RC", "TP","Habitat", "Treatment")
+LbNTI.ted.Z<-LbNTI.ted
+Lrc.Z<-Lrc
+
+#
+bNTI.ted<-read.csv("weighted_bNTI.ted.R.F.csv", head = T, row.names =1)
+bNTI.ted<-as.dist(bNTI.ted)
+bNTI.ted.01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+rc0<-read.csv("rc.R.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc.01<-(rc+1)/2
+
+env.L1<-droplevels(env.L[env.L$Habitat=="Root",])
+
+t1<-levels(env.L1$bb)
+LbNTI.ted = NULL
+for (i in t1){
+  m1<-as.matrix(bNTI.ted)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  LbNTI.ted<-rbind(LbNTI.ted,m1)
+}
+LbNTI.ted2<-cSplit(LbNTI.ted, "TP.TREAT", ".")
+LbNTI.ted2$TP.TREAT_1<-as.numeric(gsub("TP", "" , LbNTI.ted2$TP.TREAT_1))
+LbNTI.ted.TP.TREAT<-LbNTI.ted2
+names(LbNTI.ted.TP.TREAT)<-c("bNTI.ted", "TP","Habitat", "Treatment")
+LbNTI.ted<-data.frame(LbNTI.ted$TP.TREAT,LbNTI.ted.TP.TREAT)
+names(LbNTI.ted)<-c("TP.TREAT", "bNTI.ted", "TP","Habitat", "Treatment")
+# RC
+t1<-levels(env.L1$bb)
+Lrc = NULL
+for (i in t1){
+  m1<-as.matrix(rc)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  Lrc<-rbind(Lrc,m1)
+}
+Lrc2<-cSplit(Lrc, "TP.TREAT", ".")
+Lrc2$TP.TREAT_1<-as.numeric(gsub("TP", "" , Lrc2$TP.TREAT_1))
+RC.TP.TREAT<-Lrc2
+names(RC.TP.TREAT)<-c("RC", "TP","Habitat", "Treatment")
+Lrc<-data.frame(Lrc$TP.TREAT,Lrc2)
+names(Lrc)<-c("TP.TREAT", "RC", "TP","Habitat", "Treatment")
+LbNTI.ted.R<-LbNTI.ted
+Lrc.R<-Lrc
+
+#
+bNTI.ted<-read.csv("weighted_bNTI.ted.L.F.csv", head = T, row.names =1)
+bNTI.ted<-as.dist(bNTI.ted)
+bNTI.ted.01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+rc0<-read.csv("rc.L.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc.01<-(rc+1)/2
+
+env.L1<-droplevels(env.L[env.L$Habitat=="Leaf",])
+
+t1<-levels(env.L1$bb)
+LbNTI.ted = NULL
+for (i in t1){
+  m1<-as.matrix(bNTI.ted)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  LbNTI.ted<-rbind(LbNTI.ted,m1)
+}
+LbNTI.ted2<-cSplit(LbNTI.ted, "TP.TREAT", ".")
+LbNTI.ted2$TP.TREAT_1<-as.numeric(gsub("TP", "" , LbNTI.ted2$TP.TREAT_1))
+LbNTI.ted.TP.TREAT<-LbNTI.ted2
+names(LbNTI.ted.TP.TREAT)<-c("bNTI.ted", "TP","Habitat", "Treatment")
+LbNTI.ted<-data.frame(LbNTI.ted$TP.TREAT,LbNTI.ted.TP.TREAT)
+names(LbNTI.ted)<-c("TP.TREAT", "bNTI.ted", "TP","Habitat", "Treatment")
+# RC
+t1<-levels(env.L1$bb)
+Lrc = NULL
+for (i in t1){
+  m1<-as.matrix(rc)[grep(i, env.L1$bb), grep(i, env.L1$bb) ]
+  m1<-data.frame(melt(m1[lower.tri(m1, diag = FALSE)]))
+  m1$TP.TREAT=i
+  #m1$Habitat="Leaf"
+  Lrc<-rbind(Lrc,m1)
+}
+Lrc2<-cSplit(Lrc, "TP.TREAT", ".")
+Lrc2$TP.TREAT_1<-as.numeric(gsub("TP", "" , Lrc2$TP.TREAT_1))
+RC.TP.TREAT<-Lrc2
+names(RC.TP.TREAT)<-c("RC", "TP","Habitat", "Treatment")
+Lrc<-data.frame(Lrc$TP.TREAT,Lrc2)
+names(Lrc)<-c("TP.TREAT", "RC", "TP","Habitat", "Treatment")
+
+LbNTI.ted.L<-LbNTI.ted
+Lrc.L<-Lrc
+
+LbNTI.ted<-rbind(LbNTI.ted.L , LbNTI.ted.Z, LbNTI.ted.R,LbNTI.ted.S )
+Lrc<-rbind(Lrc.L , Lrc.Z, Lrc.R,Lrc.S )
+
+#
+da<-Lrc
+da1<-da[da$RC<=-0.95,]
+y  <- NULL;
+t1<-levels(env.L$bb)
+for (i in t1){
+  tmp0<-nrow(da[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y<-rbind(y, tmp1)
+}
+da2<-da[da$RC>-0.95 & da$RC<0.95,]
+z  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  z<-rbind(z, tmp1)
+}
+da3<-da[da$RC>0.95,]
+x  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da3[da3$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  x<-rbind(x, tmp1)
+}
+xyz<-data.frame(y,z,x)
+xyz$RC95pct<-z$tmp/(x$tmp+y$tmp+z$tmp)
+LaggRC<-data.frame(xyz$i,xyz$RC95pct)
+names(LaggRC)<-c("TP.TREAT", "RC95pct")
+# bNTI.ted
+da<-LbNTI.ted
+da1<-da[da$bNTI.ted<=-2,]
+y  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y<-rbind(y, tmp1)
+}
+da2<-da[da$bNTI.ted>-2 & da$bNTI.ted<2,]
+z  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  z<-rbind(z, tmp1)
+}
+da3<-da[da$bNTI.ted>2,]
+x  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da3[da3$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  x<-rbind(x, tmp1)
+}
+xyz<-data.frame(y,z,x)
+xyz$bNTI.ted2pct<-z$tmp/(x$tmp+y$tmp+z$tmp)
+Lagg2bNTI.ted<-data.frame(xyz$i,xyz$bNTI.ted2pct)
+names(Lagg2bNTI.ted)<-c("TP.TREAT", "bNTI.ted2pct")
+
+
+#Lagg2bNTI.ted
+
+#LbNTI.ted$TP.TREAT==Lrc$TP.TREAT
+Lrc.bNTI.ted<-data.frame(Lrc, LbNTI.ted)
+#Lrc.bNTI.ted$TP.TREAT==Lrc.bNTI.ted$TP.TREAT.1
+
+Lrc.bNTI.ted<-data.frame(Lrc.bNTI.ted,1)
+
+
+da<-Lrc.bNTI.ted
+da1<-da[da$bNTI.ted>-2 & da$bNTI.ted<2 & da$RC> -0.95 & da$RC < 0.95 ,]
+y  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y<-rbind(y, tmp1)
+}
+
+da2<-da[-(da$bNTI.ted>-2 & da$bNTI.ted<2 & da$RC> -0.95 & da$RC < 0.95),]
+z  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  z<-rbind(z, tmp1)
+}
+
+xyz<-data.frame(y,z)
+xyz$bNTI.ted2RC95pct<-y$tmp/(y$tmp+z$tmp)
+Lagg2bNTI.ted2RC95pct<-data.frame(xyz$i,xyz$bNTI.ted2RC95pct)
+names(Lagg2bNTI.ted2RC95pct)<-c("TP.TREAT", "bNTI.ted2RC95pct")
+
+#aggregate(Lrc.bNTI.ted$X1, by=list(Occurence=Lrc.bNTI.ted$TP.TREAT), FUN=sum)
+
+da<-Lrc.bNTI.ted
+
+da1<-da[da$RC<= -0.95,]
+y1  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da1[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y1<-rbind(y1, tmp1)
+}
+y1<-data.frame(y1, "RC <= -0.95")
+names(y1)<-c("Value", "TP.TREAT", "RC.partition")
+
+da2<-da[abs(da$RC)< 0.95,]
+y2  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y2<-rbind(y2, tmp1)
+}
+y2<-data.frame(y2, "abs(RC) < 0.95")
+names(y2)<-c("Value", "TP.TREAT", "RC.partition")
+
+
+da3<-da[da$RC>=0.95,]
+y3  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da3[da3$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y3<-rbind(y3, tmp1)
+}
+y3<-data.frame(y3, "RC >= 0.95")
+names(y3)<-c("Value", "TP.TREAT", "RC.partition")
+
+RC.part<-rbind(y1,y2,y3)
+
+#RC.part$TP.TREAT
+RC.part2<-cSplit(RC.part, "TP.TREAT", ".")
+RC.part2$TP.TREAT_1<-as.numeric(gsub("TP", "" , RC.part2$TP.TREAT_1))
+RC.part.TP.TREAT<-RC.part2
+names(RC.part.TP.TREAT)<-c("Value","RC.partition",  "TP", "Habitat", "Treatment")
+
+
+###
+
+da<-Lrc.bNTI.ted
+
+da1<-da[da$bNTI.ted<= -2,]
+y1  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da1[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y1<-rbind(y1, tmp1)
+}
+y1<-data.frame(y1, "bNTI.ted <= -2")
+names(y1)<-c("Value", "TP.TREAT", "bNTI.ted.partition")
+
+da2<-da[abs(da$bNTI.ted)< 2,]
+y2  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y2<-rbind(y2, tmp1)
+}
+y2<-data.frame(y2, "abs(bNTI.ted) < 2")
+names(y2)<-c("Value", "TP.TREAT", "bNTI.ted.partition")
+
+
+da3<-da[da$bNTI.ted>=2,]
+y3  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da3[da3$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y3<-rbind(y3, tmp1)
+}
+y3<-data.frame(y3, "bNTI.ted >= 2")
+names(y3)<-c("Value", "TP.TREAT", "bNTI.ted.partition")
+
+bNTI.ted.part<-rbind(y1,y2,y3)
+
+#bNTI.ted.part$TP.TREAT
+bNTI.ted.part2<-cSplit(bNTI.ted.part, "TP.TREAT", ".")
+bNTI.ted.part2$TP.TREAT_1<-as.numeric(gsub("TP", "" , bNTI.ted.part2$TP.TREAT_1))
+bNTI.ted.part.TP.TREAT<-bNTI.ted.part2
+names(bNTI.ted.part.TP.TREAT)<-c("Value","bNTI.ted.partition",  "TP", "Habitat", "Treatment")
+#
+da<-Lrc.bNTI.ted
+
+da1<-da[abs(da$bNTI.ted)<2 & da$RC<= -0.95,]
+y1  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da1[da1$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y1<-rbind(y1, tmp1)
+}
+y1<-data.frame(y1, "abs(bNTI.ted) < 2 & RC <= -0.95")
+names(y1)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+da2<-da[abs(da$bNTI.ted)< 2 & abs(da$RC)< 0.95,]
+y2  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da2[da2$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y2<-rbind(y2, tmp1)
+}
+y2<-data.frame(y2, "abs(bNTI.ted) < 2 & abs(RC) < 0.95")
+names(y2)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+da3<-da[abs(da$bNTI.ted)<2 & da$RC>=0.95,]
+y3  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da3[da3$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y3<-rbind(y3, tmp1)
+}
+y3<-data.frame(y3, "abs(bNTI.ted) < 2 & RC >= 0.95")
+names(y3)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+da4<-da[da$bNTI.ted>=2 & da$RC>=0.95,]
+y4  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da4[da4$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y4<-rbind(y4, tmp1)
+}
+
+y4<-data.frame(y4, "bNTI.ted >= 2 & RC >= 0.95")
+names(y4)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+da5<-da[da$bNTI.ted>=2 & abs(da$RC)< 0.95,]
+y5  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da5[da5$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y5<-rbind(y5, tmp1)
+}
+
+y5<-data.frame(y5, "bNTI.ted >= 2 & abs(RC) < 0.95")
+names(y5)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+da6<-da[da$bNTI.ted>=2 & da$RC<= -0.95,]
+y6  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da6[da6$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y6<-rbind(y6, tmp1)
+}
+
+y6<-data.frame(y6, "bNTI.ted >= 2 & RC <= -0.95")
+names(y6)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+#
+da7<-da[da$bNTI.ted<= -2 & da$RC>=0.95,]
+y7  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da7[da7$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y7<-rbind(y7, tmp1)
+}
+
+y7<-data.frame(y7, "bNTI.ted <= -2 & RC >= 0.95")
+names(y7)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+da8<-da[da$bNTI.ted<= -2 & abs(da$RC)< 0.95,]
+y8  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da8[da8$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y8<-rbind(y8, tmp1)
+}
+
+y8<-data.frame(y8, "bNTI.ted <= -2 & abs(RC) < 0.95")
+names(y8)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+da9<-da[da$bNTI.ted<= -2 & da$RC<= -0.95,]
+y9  <- NULL;
+for (i in t1){
+  tmp0<-nrow(da9[da9$TP.TREAT== i,])
+  tmp1<-data.frame(tmp0,i)
+  y9<-rbind(y9, tmp1)
+}
+
+y9<-data.frame(y9, "bNTI.ted <= -2 & RC < -0.95")
+names(y9)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+
+
+#y6 <-15 - (y1$Value+y2$Value+y3$Value+y4$Value+y5$Value+y6$Value+y7$Value+y8$Value+y9$Value)
+#y6<-data.frame(y6,y1$TP.TREAT, "Others")
+#names(y6)<-c("Value", "TP.TREAT", "bNTI.ted.RC.partition")
+bNTI.ted.RC.part<-rbind(y1,y2,y3,y4,y5, y6, y7, y8,y9)
+
+#bNTI.ted.RC.part$TP.TREAT
+bNTI.ted.RC.part2<-cSplit(bNTI.ted.RC.part, "TP.TREAT", ".")
+bNTI.ted.RC.part2$TP.TREAT_1<-as.numeric(gsub("TP", "" , bNTI.ted.RC.part2$TP.TREAT_1))
+bNTI.ted.RC.part.TP.TREAT<-bNTI.ted.RC.part2
+names(bNTI.ted.RC.part.TP.TREAT)<-c("Value","bNTI.ted.RC.partition",  "TP", "Habitat", "Treatment")
+
+
+#SCNM
+
+source("sncm.fit.R")
+#tmp<-read.csv("fungL.R362F.csv", head =T, row.names =1)
+d.ck<-data.frame()
+for (j in c("Root", "Rhizosphere", "Leaf", "Soil")){
+  for (i in c(1:17)){
+    tmp0<-tmp[env.L$Treatment1=="Control" & env.L$Habitat== j & env.L$TP== i,]
+    dd<-data.frame(sncm.fit(tmp0),j,i, "Control")
+    d.ck<-rbind(d.ck, dd)
+  }
+}
+
+
+tmp0<-tmp[env.L$Treatment1=="Control" & env.L$Habitat== "Soil" & env.L$TP== 0,]
+dd<-data.frame(sncm.fit(tmp0),"Soil", 0 , "Control")
+names(dd)<-names(d.ck)
+d.ck<-rbind(d.ck, dd)
+
+tmp0<-tmp[env.L$Treatment1=="Pre_flowering_drought" & env.L$Habitat== "Soil" & env.L$TP== 0,]
+dd<-data.frame(sncm.fit(tmp0),"Soil", 0 , "Pre_flowering_drought")
+names(dd)<-names(d.ck)
+d.ck<-rbind(d.ck, dd)
+
+tmp0<-tmp[env.L$Treatment1=="Post_flowering_drought" & env.L$Habitat== "Soil" & env.L$TP== 0,]
+dd<-data.frame(sncm.fit(tmp0),"Soil", 0 , "Post_flowering_drought")
+names(dd)<-names(d.ck)
+d.ck<-rbind(d.ck, dd)
+
+d.pr<-data.frame()
+for (j in c("Root", "Rhizosphere", "Leaf", "Soil")){
+  for (i in c(3:17)){
+    tmp0<-tmp[env.L$Treatment1=="Pre_flowering_drought" & env.L$Habitat== j & env.L$TP== i,]
+    dd<-data.frame(sncm.fit(tmp0),j,i, "Pre_flowering_drought")
+    d.pr<-rbind(d.pr, dd)
+  }
+}
+
+d.po<-data.frame()
+for (j in c("Root", "Rhizosphere", "Leaf", "Soil")){
+  for (i in c(8:17)){
+    tmp0<-tmp[env.L$Treatment1=="Post_flowering_drought"& env.L$Habitat== j & env.L$TP== i,]
+    dd<-data.frame(sncm.fit(tmp0),j,i, "Post_flowering_drought")
+    d.po<-rbind(d.po, dd)
+  }
+}
+names(d.po)<-names(d.pr)<-names(d.ck)
+L.sncm<-rbind(d.po,d.pr,d.ck)
+#L.sncm$X.Control.
+L.sncm$lev<-interaction(L.sncm$j,L.sncm$X.Control.,L.sncm$i,sep = ":")
+names(L.sncm)<-c( "m","m.ci","m.mle","maxLL","binoLL","poisLL","Rsqr","Rsqr.bino","Rsqr.pois","RMSE","RMSE.bino","RMSE.pois","AIC","BIC","AIC.bino","BIC.bino","AIC.pois","BIC.pois","N","Samples","Richness","Detect","Habitat", "TP", "Treatment","Level")
+
+t1<-levels(droplevels(env.L$bb))
+Fst = NULL
+for (i in t1){
+  m1<-w.fst(tmp[env.L$bb== i,])
+  m1<-data.frame(m1, i)
+  Fst<-rbind(Fst,m1)
+}
+names(Fst)<-c("Fst", "TP.TREAT")
+
+phylo = read.tree("tedtree4.txt");
+#phylo; # a summary of the phylogeny
+#plot.phylo(phylo,typ="fan", font =1, cex=1)
+#bNTI.ted<-read.csv("weighted_bNTI.ted.F.csv", head = T, row.names =1)
+#bNTI.ted<-as.dist(bNTI.ted)
+#bNTI.ted01<-(bNTI.ted-min(bNTI.ted))/(max(bNTI.ted)-min(bNTI.ted))
+
+#RC
+rc0<-read.csv("rc.RSZL.F.csv", head = T, row.names =1)
+rc<-as.dist(rc0)
+rc01<-(rc+1)/2
+
+env.L$va<-interaction(env.L$TP, env.L$Habitat2)
+fd<-beta.pair(tmp01, index.family = "jaccard")
+bc<-vegdist(tmp)
+bd.rc<-betadisper(rc01,env.L$va)
+env.L$RCdisper<-bd.rc$distances
+bd.bc<-betadisper(bc,env.L$va)
+env.L$bradisper<-bd.bc$distances
+bd.jac<-betadisper(fd$beta.jac,env.L$va)
+env.L$jacdisper<-bd.jac$distances
+bd.jne<-betadisper(fd$beta.jne,env.L$va)
+env.L$jnedisper<-bd.jne$distances
+bd.jtu<-betadisper(fd$beta.jtu,env.L$va)
+env.L$jtudisper<-bd.jtu$distances
+#bd.bNTI.ted01<-betadisper(bNTI.ted01,env.L$va)
+#env.L$bNTI.teddisper<-bd.bNTI.ted01$distances
+
+##Meta data###
+#env.L$Fungi.pct<-rowSums(fungL.rawF)/colSums(fung0.L[,26:277])
+env.L$S.raw<-specnumber(fung.raw)
+env.L$S.rar362<-specnumber(tmp)
+env.L$OTU15_Ustilago<-tmp$OTU15_Ustilago
+env.L$yeasts<-tmp$OTU26_Sporobolomyces+tmp$OTU10_Filobasidium+tmp$OTU24_Cryptococcus+tmp$OTU14_Symmetrospora
+Laggmeta<-aggregate(cbind(env.L$Fungi.pct, env.L$S.raw, env.L$S.rar362,env.L$RCdisper, 
+                          env.L$bradisper, env.L$jacdisper, env.L$jnedisper, 
+                          env.L$jtudisper),by=list(env.L$bb) , mean)
+names(Laggmeta)<-c("TP.TREAT","Fungi.pct", "S.raw", "S.rar362", "RCdisper", "bradisper",
+                   "jacdisper", "jnedisper", "jtudisper")
+Lagg<-merge(LaggRC,  Laggmeta, by="TP.TREAT", all = FALSE)
+Lagg<-merge(Lagg,  Lagg2bNTI.ted,  by="TP.TREAT", all = FALSE)
+Lagg<-merge(Lagg,  Lagg2bNTI.ted2RC95pct, by="TP.TREAT", all = FALSE)
+
+fung.L1<-cSplit(Lagg, "TP.TREAT", ".")
+fung.L1$TP.TREAT_1<-as.numeric(gsub("TP", "" , fung.L1$TP.TREAT_1))
+fung.L1$Level<-interaction(fung.L1$TP.TREAT_2,fung.L1$TP.TREAT_3 ,fung.L1$TP.TREAT_1 ,sep = ":")
+Lagg<-data.frame(fung.L1$Level,Lagg)
+Lagg<-merge(Lagg, L.sncm, by.x="fung.L1.Level", by.y= "Level", all= TRUE )
+#L.sncm$Level
+#Lagg$fung.L1.Level
+Lagg<-merge(Lagg,Fst, by="TP.TREAT")
+
+## LaggqPCR
+env.LqPCR<-env.L[env.L$qPCR > 0, ]
+LaggqPCRmeta<-aggregate(cbind(env.LqPCR$Fungi.pct,env.LqPCR$qPCR, env.LqPCR$S.raw, env.LqPCR$S.rar362,
+                              env.LqPCR$RCdisper, env.LqPCR$bradisper, env.LqPCR$jacdisper, 
+                              env.LqPCR$jnedisper,env.LqPCR$jtudisper),by=list(env.LqPCR$bb) , mean)
+
+names(LaggqPCRmeta)<-c("TP.TREAT","Fungi.pct", "qPCR", "S.raw", "S.rar362", "RCdisper", "bradisper",
+                       "jacdisper", "jnedisper", "jtudisper")
+
+
+LaggqPCR<-merge(LaggRC,  LaggqPCRmeta, by="TP.TREAT", all = FALSE)
+LaggqPCR<-merge(LaggqPCR,  Lagg2bNTI.ted,  by="TP.TREAT", all = FALSE)
+LaggqPCR<-merge(LaggqPCR,  Lagg2bNTI.ted2RC95pct, by="TP.TREAT", all = FALSE)
+
+
+fung.L1qPCR<-cSplit(LaggqPCR, "TP.TREAT", ".")
+fung.L1qPCR$TP.TREAT_1<-as.numeric(gsub("TP", "" , fung.L1qPCR$TP.TREAT_1))
+fung.L1qPCR$Level<-interaction(fung.L1qPCR$TP.TREAT_2,fung.L1qPCR$TP.TREAT_3 ,fung.L1qPCR$TP.TREAT_1 ,sep = ":")
+LaggqPCR<-data.frame(fung.L1qPCR$Level,LaggqPCR)
+LaggqPCR<-merge(LaggqPCR, L.sncm, by.x="fung.L1qPCR.Level", by.y= "Level", all= TRUE )
+
+LaggqPCR<-merge(LaggqPCR,Fst, by="TP.TREAT")
+
+##Meta data Transcriptome###
+
+LaggmetaMet<-aggregate(cbind(env.Tra$Pct.Tra, 
+                             env.Tra$S.rar362,env.Tra$RCdisper, env.Tra$bradisper,
+                             env.Tra$jacdisper, env.Tra$jnedisper, 
+                             env.Tra$jtudisper),by=list(env.Tra$bb) , mean)
+names(LaggmetaMet)<-c("TP.TREAT","Fungi.pct.tra", "S.rar362", "RCdisper", "bradisper",
+                      "jacdisper", "jnedisper", "jtudisper")
+Traagg<-merge(LaggRC, LaggmetaMet, by="TP.TREAT", all = FALSE)
+Traagg<-merge(Traagg,  Lagg2bNTI.ted, by="TP.TREAT", all = FALSE)
+Traagg<-merge(Traagg,  Lagg2bNTI.ted2RC95pct, by="TP.TREAT", all = FALSE)
+fung.L1<-cSplit(Traagg, "TP.TREAT", ".")
+fung.L1$TP.TREAT_1<-as.numeric(gsub("TP", "" , fung.L1$TP.TREAT_1))
+#fung.L1$Level<-interaction(fung.L1$TP.TREAT_2,fung.L1$TP.TREAT_1 ,sep = ":")
+fung.L1$Level<-interaction(fung.L1$TP.TREAT_2,fung.L1$TP.TREAT_3 ,fung.L1$TP.TREAT_1 ,sep = ":")
+Traagg<-data.frame(fung.L1$Level,Traagg)
+Traagg<-merge(Traagg, L.sncm, by.x="fung.L1.Level", by.y= "Level", all= FALSE )
+Traagg<-merge(Traagg,Fst, by="TP.TREAT")
+
+
+
+save.image("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")

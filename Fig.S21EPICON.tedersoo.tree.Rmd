@@ -1,0 +1,81 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/18/2019"
+output: html_document
+---
+```{r}
+library(reshape2)
+library(ggplot2)
+library(MASS)
+library(splitstackshape)
+library(colorRamps)
+library(vegan)
+library(picante)
+setwd("/Users/chengg/Google\ Drive/EPICON/Mycobiome/Fungal\ ITS/statistic/Total.fungi")
+library(ggtree)
+library(treeio)
+library(ape)
+library(phytools)
+rm(list = ls())
+ID0<- read.csv("epicon.ID.2018.08.27.csv")
+fung0<-read.csv("epicon.otutable.2018.08.27.csv", head=T, row.names =1) ##Read in the raw data###
+fung<-fung0[ID0$AccessionNo!=".",]
+ID<-ID0[ID0$AccessionNo!=".",]
+
+env<-read.csv("epicon.ENV.2018.08.27.csv", head = T)
+phylo = read.tree("tedtree4.txt")
+#phylo <- reroot(phylo, node = 2130)
+
+tree.trait<-read.csv("EPICON.TedTreeTraits.csv", head=T)
+tree.trait1<-tree.trait[match(phylo$tip.label, tree.trait$Tips),]
+phylo$tip.label==tree.trait1$Tips
+
+lb = phylo$tip.label
+d = data.frame(label=lb, label2 = tree.trait1$Tips, phylum = tree.trait1$Phylum, ID=tree.trait1$ID)
+groupInfo <- split(tree.trait1$Tips, tree.trait1$Phylum)
+phylo <- groupOTU(phylo, groupInfo)
+p1<-ggtree(phylo,aes(color=group))%<+% d + geom_tiplab(aes(label=ID, color = phylum), size = 1)+ geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
+
+
+pdf("FEPICON.tedtree.unrooted.pdf", width=13, height=40)
+p1
+dev.off()
+
+```
+
+
+```{r}
+rm(list = ls())
+ID0<- read.csv("epicon.ID.2018.08.27.csv")
+fung0<-read.csv("epicon.otutable.2018.08.27.csv", head=T, row.names =1) ##Read in the raw data###
+fung<-fung0[ID0$AccessionNo!=".",]
+ID<-ID0[ID0$AccessionNo!=".",]
+tree.trait<-read.csv("EPICON.TedTreeTraits.csv", head=T)
+env<-read.csv("epicon.ENV.2018.08.27.csv", head = T)
+phylo = read.tree("tedtree4.txt")
+
+
+tree.trait.drop<-droplevels(tree.trait[tree.trait$Phylum=="unidentified",])
+droptip <- as.character(tree.trait.drop$Tips)
+tree.trait.sel<-droplevels(tree.trait[tree.trait$Phylum!="unidentified",])
+phylo<-drop.tip(phylo, droptip)
+
+phylo <- reroot(phylo, node = 1332)
+
+tree.trait1<-tree.trait.sel[match(phylo$tip.label,tree.trait.sel$Tips),]
+phylo$tip.label==tree.trait1$Tips
+
+lb = phylo$tip.label
+d = data.frame(label=lb, label2 = tree.trait1$Tips, phylum = tree.trait1$Phylum, ID=tree.trait1$ID)
+groupInfo <- split(tree.trait1$Tips, tree.trait1$Phylum)
+phylo <- groupOTU(phylo, groupInfo)
+ggtree(phylo,aes(color=group))%<+% d + geom_tiplab(aes(label=ID, color = phylum), size = 1)+geom_text2(aes(subset=!isTip, label=node), hjust=-.3)
+
+p1<-ggtree(phylo,aes(color=group))%<+% d + geom_tiplab(aes(label=ID, color = phylum), size = 1)
+pdf("Fig.21.EPICON.tedtree.rooted.pdf", width=13, height=40)
+p1
+dev.off()
+
+```
+

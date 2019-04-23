@@ -1,0 +1,245 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/9/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 6, fig.width = 8, fig.align = "center"}
+
+
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(reshape2)
+library(ggplot2)
+library(vegan)
+library(BiodiversityR)
+library(MASS)
+library(splitstackshape)
+library(ape)
+library(ggtern)
+
+
+rm(list = ls())
+
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+fung1<-fung.raw
+env0<-env
+
+ha<-"Leaf"
+
+fung.R<-fung1[env0$TP ==0 ,]
+fung.Z<-fung1[env0$TP>0 & env0$Habitat==ha,]
+fung.S<-fung1[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R<-env0[env0$TP ==0 ,]
+env.Z<-env0[env0$TP>0 & env0$Habitat==ha,]
+env.S<-env0[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R$fa<-"US"
+env.Z$fa<-"Leaf"
+env.S$fa<-"PS"
+fung.RSZ<-data.frame(rbind(fung.R,fung.Z,fung.S))
+env.RSZ<-data.frame(rbind(env.R,env.Z,env.S))
+fung.RSZ<-data.frame(rrarefy(fung.RSZ, min(rowSums (fung.RSZ)))) 
+fung.RSZ1<-fung.RSZ[,colSums(fung.RSZ)>0]
+library(labdsv) 
+iva <- indval(fung.RSZ1, droplevels(factor(env.RSZ$fa)))
+summary(iva)  
+ind<-data.frame(iva$pval)
+#titan.leaf.OTUs<-data.frame(titan.leaf.control$sppmax)
+ind<-data.frame(row.names(ind), ind)
+ind<-ind[ind$iva.pval< 0.01,]
+aa<-data.frame(row.names(ind),"Indicator")
+names(aa)<-c("OTU", "Indicator")
+bb<-data.frame(setdiff(ID$OTU.ID , aa$OTU),"NS")
+names(bb)<-c("OTU", "Indicator")
+cc<-rbind(aa, bb)
+cc<-cc[match(ID$OTU.ID, cc$OTU),]
+ID<-data.frame(cc, ID)
+rr<-colSums(fung.R)
+zz<-colSums(fung.Z)
+ss<-colSums(fung.S)
+#rr/sum(rr)
+Abundance<-rr+zz+ss
+da<-data.frame(rr/sum(rr),zz/sum(zz),ss/sum(ss),Abundance, ID)
+da<-da[da$Abundance>0,]
+#write.csv(da,"da.T.csv")
+da$US<-da$rr.sum.rr.
+da$Leaf<-da$zz.sum.zz.
+da$PS<-da$ss.sum.ss.
+ggtern(data=da[da$Indicator=="Indicator",],aes(US,Leaf,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+ggtern(data=da,aes(US,Leaf,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+
+
+ha<-"Root"
+
+fung.R<-fung1[env0$TP ==0 ,]
+fung.Z<-fung1[env0$TP>0 & env0$Habitat==ha,]
+fung.S<-fung1[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R<-env0[env0$TP ==0 ,]
+env.Z<-env0[env0$TP>0 & env0$Habitat==ha,]
+env.S<-env0[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R$fa<-"US"
+env.Z$fa<-"Root"
+env.S$fa<-"PS"
+fung.RSZ<-data.frame(rbind(fung.R,fung.Z,fung.S))
+env.RSZ<-data.frame(rbind(env.R,env.Z,env.S))
+fung.RSZ<-data.frame(rrarefy(fung.RSZ, min(rowSums (fung.RSZ)))) 
+fung.RSZ1<-fung.RSZ[,colSums(fung.RSZ)>0]
+library(labdsv) 
+iva <- indval(fung.RSZ1, droplevels(factor(env.RSZ$fa)))
+summary(iva)  
+ind<-data.frame(iva$pval)
+#titan.Root.OTUs<-data.frame(titan.Root.control$sppmax)
+ind<-data.frame(row.names(ind), ind)
+ind<-ind[ind$iva.pval< 0.01,]
+aa<-data.frame(row.names(ind),"Indicator")
+names(aa)<-c("OTU", "Indicator")
+bb<-data.frame(setdiff(ID$OTU.ID , aa$OTU),"NS")
+names(bb)<-c("OTU", "Indicator")
+cc<-rbind(aa, bb)
+cc<-cc[match(ID$OTU.ID, cc$OTU),]
+ID<-data.frame(cc, ID)
+rr<-colSums(fung.R)
+zz<-colSums(fung.Z)
+ss<-colSums(fung.S)
+#rr/sum(rr)
+Abundance<-rr+zz+ss
+da<-data.frame(rr/sum(rr),zz/sum(zz),ss/sum(ss),Abundance, ID)
+da<-da[da$Abundance>0,]
+#write.csv(da,"da.T.csv")
+da$US<-da$rr.sum.rr.
+da$Root<-da$zz.sum.zz.
+da$PS<-da$ss.sum.ss.
+ggtern(data=da[da$Indicator=="Indicator",],aes(US,Root,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+ggtern(data=da,aes(US,Root,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+ha<-"Rhizosphere"
+
+fung.R<-fung1[env0$TP ==0 ,]
+fung.Z<-fung1[env0$TP>0 & env0$Habitat==ha,]
+fung.S<-fung1[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R<-env0[env0$TP ==0 ,]
+env.Z<-env0[env0$TP>0 & env0$Habitat==ha,]
+env.S<-env0[env0$TP > 0 & env0$Habitat=="Soil",]
+env.R$fa<-"US"
+env.Z$fa<-"Rhizosphere"
+env.S$fa<-"PS"
+fung.RSZ<-data.frame(rbind(fung.R,fung.Z,fung.S))
+env.RSZ<-data.frame(rbind(env.R,env.Z,env.S))
+fung.RSZ<-data.frame(rrarefy(fung.RSZ, min(rowSums (fung.RSZ)))) 
+fung.RSZ1<-fung.RSZ[,colSums(fung.RSZ)>0]
+library(labdsv) 
+iva <- indval(fung.RSZ1, droplevels(factor(env.RSZ$fa)))
+summary(iva)  
+ind<-data.frame(iva$pval)
+#titan.Rhizosphere.OTUs<-data.frame(titan.Rhizosphere.control$sppmax)
+ind<-data.frame(row.names(ind), ind)
+ind<-ind[ind$iva.pval< 0.01,]
+aa<-data.frame(row.names(ind),"Indicator")
+names(aa)<-c("OTU", "Indicator")
+bb<-data.frame(setdiff(ID$OTU.ID , aa$OTU),"NS")
+names(bb)<-c("OTU", "Indicator")
+cc<-rbind(aa, bb)
+cc<-cc[match(ID$OTU.ID, cc$OTU),]
+ID<-data.frame(cc, ID)
+rr<-colSums(fung.R)
+zz<-colSums(fung.Z)
+ss<-colSums(fung.S)
+#rr/sum(rr)
+Abundance<-rr+zz+ss
+da<-data.frame(rr/sum(rr),zz/sum(zz),ss/sum(ss),Abundance, ID)
+da<-da[da$Abundance>0,]
+#write.csv(da,"da.T.csv")
+da$US<-da$rr.sum.rr.
+da$Rhizosphere<-da$zz.sum.zz.
+da$PS<-da$ss.sum.ss.
+ggtern(data=da[da$Indicator=="Indicator",],aes(US,Rhizosphere,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+ggtern(data=da,aes(US,Rhizosphere,PS,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+
+
+
+
+fung.R<-fung1[env0$TP > 0 & env0$Habitat=="Leaf",]
+fung.Z<-fung1[env0$TP>0 & env0$Habitat=="Root",]
+fung.S<-fung1[env0$TP > 0 & env0$Habitat=="Rhizosphere",]
+env.R<-env0[env0$TP > 0 & env0$Habitat=="Leaf",]
+env.Z<-env0[env0$TP>0 & env0$Habitat=="Root",]
+env.S<-env0[env0$TP > 0 & env0$Habitat=="Rhizosphere",]
+env.R$fa<-"Leaf"
+env.Z$fa<-"Root"
+env.S$fa<-"Rhizosphere"
+fung.RSZ<-data.frame(rbind(fung.R,fung.Z,fung.S))
+env.RSZ<-data.frame(rbind(env.R,env.Z,env.S))
+fung.RSZ<-data.frame(rrarefy(fung.RSZ, min(rowSums (fung.RSZ)))) 
+fung.RSZ1<-fung.RSZ[,colSums(fung.RSZ)>0]
+library(labdsv) 
+iva <- indval(fung.RSZ1, droplevels(factor(env.RSZ$fa)))
+summary(iva)  
+ind<-data.frame(iva$pval)
+#titan.Rhizosphere.OTUs<-data.frame(titan.Rhizosphere.control$sppmax)
+ind<-data.frame(row.names(ind), ind)
+ind<-ind[ind$iva.pval< 0.01,]
+aa<-data.frame(row.names(ind),"Indicator")
+names(aa)<-c("OTU", "Indicator")
+bb<-data.frame(setdiff(ID$OTU.ID , aa$OTU),"NS")
+names(bb)<-c("OTU", "Indicator")
+cc<-rbind(aa, bb)
+cc<-cc[match(ID$OTU.ID, cc$OTU),]
+ID<-data.frame(cc, ID)
+rr<-colSums(fung.R)
+zz<-colSums(fung.Z)
+ss<-colSums(fung.S)
+#rr/sum(rr)
+Abundance<-rr+zz+ss
+da<-data.frame(rr/sum(rr),zz/sum(zz),ss/sum(ss),Abundance, ID)
+da<-da[da$Abundance>0,]
+#write.csv(da,"da.T.csv")
+da$Leaf<-da$rr.sum.rr.
+da$Root<-da$zz.sum.zz.
+da$Rhizosphere<-da$ss.sum.ss.
+ggtern(data=da[da$Indicator=="Indicator",],aes(Leaf,Rhizosphere,Root,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+ggtern(data=da,aes(Leaf,Rhizosphere,Root,color = Guild, shape = Indicator))+
+  geom_point(aes(size=sqrt(Abundance)))+
+  scale_shape_manual(values=c(1,4,0,2,3,5,6))+theme_bw()+
+  scale_color_manual(values=c("green","blue","purple","black",
+                              "chocolate", "red","grey"))+theme_nomask()
+
+
+
+
+
+```
+

@@ -1,0 +1,43 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/7/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 7}
+library(ggplot2)
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+
+ggplot(env, aes(x= factor(TP), y=Fungi.pct, color=Habitat)) + geom_boxplot() + 
+  labs(x="Week",y = "Community size: fungal amplicon %")+
+  scale_color_manual(values=c("black","red", "blue","skyblue"))+theme_bw()+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+
+
+d12<-read.csv("LR.mycotranscriptome.csv", head=T)
+d12$Pct.fung.transcriptome<-rowSums(d12[,c(12:20,22:24)])/d12$FilteredReads
+ggplot(d12, aes(x=log(Pct.fung.transcriptome),y= Fungi.pct,  color=Habitat.y)) +geom_smooth( method="loess", span=0.9)+
+  geom_point(alpha=1) + 
+  labs(y="Community size: fungal amplicon %",x = "Community size: log (fungal transcription %)")+scale_color_manual(values=c("black","red", "blue","skyblue"))+theme_bw()+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+ggplot(d12, aes(x= factor(TP.x), y=log(Pct.fung.transcriptome), color=Habitat.y)) + geom_boxplot() + 
+  labs(x="Week",y = "Community size: log (fungal transcription %)")+scale_color_manual(values=c("black","red", "blue","skyblue"))+theme_bw()+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold",angle = 90),
+        axis.title=element_text(size=15,face="bold"))
+
+```
+

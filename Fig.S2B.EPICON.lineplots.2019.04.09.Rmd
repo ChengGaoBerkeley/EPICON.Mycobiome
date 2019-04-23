@@ -1,0 +1,101 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/9/2019"
+output: html_document
+---
+
+```{r,  fig.height = 8, fig.width = 12, fig.align = "center"}
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(reshape2)
+library(ggplot2)
+library(MASS)
+library(splitstackshape)
+library(colorRamps)
+library(tidyverse)
+library(plyr)
+
+rm(list = ls())
+source("multiplot.R")
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+fung.clr<-read.csv("fung.clr.csv", head= T, row.names =1)
+fung.clr<-fung.clr[env.raw$TP>0,]
+env<-env.raw[env.raw$TP>0,]
+#d.n0.clr<-fung.clr
+#fung.clr<-fung.clr[env$TP>0,]
+#env<-env[env$TP>0,]
+fung.clrt<-data.frame(t(fung.clr))
+#ID$cluster
+tt<-levels(ID$Guild)
+
+p<-list()
+for (i in tt){
+  clu<-i
+  Clusterx<-data.frame(t(fung.clrt[ID$Guild==i,]))
+  dat.m1<-data.frame(Clusterx,env$TREAT)
+  dat.m <- melt(dat.m1,id.vars = "env.TREAT")
+  dat.m1<-data.frame(cSplit(dat.m, 'env.TREAT', sep="|", type.convert=FALSE), dat.m[,-1])
+  head(dat.m1)
+  names(dat.m1)<-c("fungi", "value", "Treatment", "Habitat", "TP", "Cultivar", "Plot", "fungi1", "value1")
+  dat.m1$TP<-as.numeric(gsub("TP", "" , dat.m1$TP))
+  dat.m1$Treatment<-factor(dat.m1$Treatment,levels=c("Control", "Pre_flowering_drought", "Post_flowering_drought"),
+                           labels=c("CON", "PRE", "POST"))
+  dat.m1$Habitat<-factor(dat.m1$Habitat,levels=c("Leaf", "Root", "Rhizosphere", "Soil"), labels=c("Leaf", "Root", "Rhiz", "Soil"))
+  dat.m1$xx<-interaction(dat.m1$Habitat,dat.m1$Treatment, dat.m1$fungi)
+  dat.m1$yy<-interaction(dat.m1$Habitat,dat.m1$Treatment)
+  dat.m1$yy<-factor(dat.m1$yy, levels=c("Leaf.CON","Leaf.PRE","Leaf.POST",
+                                        "Soil.CON","Soil.PRE","Soil.POST",
+                                        "Root.CON","Root.PRE","Root.POST",
+                                        "Rhiz.CON","Rhiz.PRE","Rhiz.POST"))
+  p[[i]]<-ggplot(data = dat.m1, aes(x = TP,  y = value, group= yy)) +
+    geom_smooth(se=FALSE,size=1, method="loess", aes(color=Habitat, linetype = Treatment))+
+    scale_linetype_manual(values= c("solid", "dotted", "dashed"))+
+    theme_bw()+
+    ggtitle( i )+
+    scale_color_manual(values=c("#ff00ff","#00ff00", "deepskyblue", "gold", "red")) +
+    geom_vline(aes(xintercept=8.99), colour="blue", linetype="dashed")+
+    theme(axis.ticks = element_line(linetype = "blank"), panel.grid.major = element_line(linetype = "blank"), panel.grid.minor = element_line(linetype = "blank"), panel.background = element_rect(fill = NA))+labs( x = NULL, y = NULL, colour = NULL)+ 
+    #theme(legend.position = "top") + 
+    theme(axis.line = element_line(colour = NA, size = 0), axis.ticks = element_line(colour = NA, size = 0))
+}
+
+p[[1]]
+
+
+p<-list()
+for (i in tt){
+  clu<-i
+  Clusterx<-data.frame(t(fung.clrt[ID$Guild==i,]))
+  dat.m1<-data.frame(Clusterx,env$TREAT)
+  dat.m <- melt(dat.m1,id.vars = "env.TREAT")
+  dat.m1<-data.frame(cSplit(dat.m, 'env.TREAT', sep="|", type.convert=FALSE), dat.m[,-1])
+  head(dat.m1)
+  names(dat.m1)<-c("fungi", "value", "Treatment", "Habitat", "TP", "Cultivar", "Plot", "fungi1", "value1")
+  dat.m1$TP<-as.numeric(gsub("TP", "" , dat.m1$TP))
+  dat.m1$Treatment<-factor(dat.m1$Treatment,levels=c("Control", "Pre_flowering_drought", "Post_flowering_drought"),
+                           labels=c("CON", "PRE", "POST"))
+  dat.m1$Habitat<-factor(dat.m1$Habitat,levels=c("Leaf", "Root", "Rhizosphere", "Soil"), labels=c("Leaf", "Root", "Rhiz", "Soil"))
+  dat.m1$xx<-interaction(dat.m1$Habitat,dat.m1$Treatment, dat.m1$fungi)
+  dat.m1$yy<-interaction(dat.m1$Habitat,dat.m1$Treatment)
+  dat.m1$yy<-factor(dat.m1$yy, levels=c("Leaf.CON","Leaf.PRE","Leaf.POST",
+                                        "Soil.CON","Soil.PRE","Soil.POST",
+                                        "Root.CON","Root.PRE","Root.POST",
+                                        "Rhiz.CON","Rhiz.PRE","Rhiz.POST"))
+  p[[i]]<-ggplot(data = dat.m1, aes(x = TP,  y = value, group= yy)) +
+    geom_smooth(se=FALSE,size=1, method="loess", aes(color=Habitat, linetype = Treatment))+
+    scale_linetype_manual(values= c("solid", "dotted", "dashed"))+
+    theme_bw()+
+    ggtitle( i )+
+    scale_color_manual(values=c("#ff00ff","#00ff00", "deepskyblue", "gold", "red")) +
+    geom_vline(aes(xintercept=8.99), colour="blue", linetype="dashed")+
+    theme(axis.ticks = element_line(linetype = "blank"), panel.grid.major = element_line(linetype = "blank"), panel.grid.minor = element_line(linetype = "blank"), panel.background = element_rect(fill = NA))+labs( x = NULL, y = NULL, colour = NULL)+ 
+    theme(legend.position = "none") + 
+    theme(axis.line = element_line(colour = NA, size = 0), axis.ticks = element_line(colour = NA, size = 0))
+  
+}
+
+
+multiplot(p[[1]],p[[2]],p[[3]],p[[4]],
+          p[[5]],p[[6]],cols = 3)
+```
+

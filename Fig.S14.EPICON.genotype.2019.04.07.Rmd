@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/7/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 2, fig.width = 3}
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(ggplot2)
+
+
+rm(list = ls())
+
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+
+da1<-data.frame(fung.rar,env)
+
+lineFig<-function(habitat,otu) {
+  da<-da1[da1$Habitat== habitat,]
+  da$value<- da[, otu]
+  p3<-ggplot(data = da, aes(x = TP,  y = value,  color=Cultivar)) +
+    geom_smooth(size=0.5,method="loess")+
+    theme_bw()+
+    #facet_wrap(~Treatment1, nrow = 3,strip.position= 'left')+
+    scale_color_manual(values=c("blue3","red")) +
+    geom_vline(aes(xintercept=8.99), colour="blue", linetype="dashed")+
+    theme(axis.ticks = element_line(linetype = "blank"), panel.grid.major = element_line(linetype = "blank"), panel.grid.minor = element_line(linetype = "blank"), panel.background = element_rect(fill = NA))+labs( x = NULL, y = NULL, colour = NULL)+ theme(legend.position = "none") + theme(axis.line = element_line(colour = NA, size = 0), axis.ticks = element_line(colour = NA, size = 0))
+  return(p3)
+}
+
+
+lineFig("Root","OTU19_Sarocladium")
+lineFig("Root","OTU20_Xylariales")
+lineFig("Root","OTU207_Magnaporthiopsis")
+lineFig("Root","OTU34_Stachybotrys")
+lineFig("Rhizosphere","OTU20_Xylariales")
+lineFig("Rhizosphere","OTU29_Rhizopus")
+lineFig("Rhizosphere","OTU207_Magnaporthiopsis")
+lineFig("Leaf","OTU24_Cryptococcus")
+lineFig("Leaf","OTU124_Cryptococcus")
+lineFig("Leaf","OTU61_Cryptococcus")
+lineFig("Leaf","OTU26_Sporobolomyces")
+lineFig("Leaf","OTU11_Epicoccum")
+lineFig("Rhizosphere","OTU20_Xylariales")
+lineFig("Rhizosphere","OTU29_Rhizopus")
+```
+

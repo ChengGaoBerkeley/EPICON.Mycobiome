@@ -1,0 +1,45 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/17/2019"
+output: html_document
+---
+
+
+```{r, fig.height = 20, fig.width = 5}
+setwd("/Users/chengg/Google\ Drive/EPICON/Mycobiome/Fungal\ ITS/statistic/Total.fungi")
+library(ggtree)
+library(treeio)
+
+ID0<- read.csv("epicon.ID.2018.08.27.csv")
+fung0<-read.csv("epicon.otutable.2018.08.27.csv", head=T, row.names =1) ##Read in the raw data###
+fung<-fung0[ID0$AccessionNo!=".",]
+ID<-ID0[ID0$AccessionNo!=".",]
+
+fung.ghost <-aggregate(fung, by=list(ID$UniteGhost), FUN=sum, na.rm=TRUE)
+row.names(fung.ghost)<-factor(fung.ghost$Group.1); 
+fung.ghost1<-data.frame(t(fung.ghost[,-1]))
+#fung.ghost1[1:10, 1:10]
+species<-colnames(fung.ghost1)
+env<-read.csv("epicon.ENV.2018.08.27.csv", head = T)
+
+phylo = read.tree("ghost_tree.nwk")
+
+EPICON.ghost.tree<-drop.tip(phylo,phylo$tip.label[-match(species, phylo$tip.label)])
+write.tree(EPICON.ghost.tree, "EPICON.ghost.tree.txt" )
+
+tree.trait<-read.csv("EPICON.GhostTreeTraits.csv", head=T)
+tree.trait1<-tree.trait[match(phylo$tip.label, tree.trait$Tips),]
+phylo$tip.label==tree.trait1$Tips
+
+lb = EPICON.ghost.tree$tip.label
+d = data.frame(label=lb, label2 = tree.trait1$Annot1, phylum = tree.trait1$Phylum)
+p1<-ggtree(EPICON.ghost.tree) %<+% d + geom_tiplab(aes(label=label2, color = phylum), size = 1)
+
+pdf("Fig.S21.EPICON.ghosttree.pdf", width=20, height=40)
+p1
+dev.off()
+
+#########
+```
+

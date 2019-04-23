@@ -1,0 +1,228 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/10/2019"
+output: html_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 8, fig.width = 5, fig.align = "center"}
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(reshape2)
+library(ggplot2)
+library(pheatmap)
+library(randomForest)
+library(tidyverse)
+library(reshape2)
+library(splitstackshape)
+
+
+
+
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+row.names(env)<-env$aa
+tc_map<-env
+otu_table<-data.frame(t(fung.raw))##Read in the raw data###ID<-read.csv("epicon.ID.2018.08.27.csv", head=T, row.names = 1)
+ID1<-ID[,c("Guild","Phylum","Class","Order","Family", "Genus","aa")]
+ID1[ID1=="_"]<-0
+#ID1[ID1==" "]<-"."
+ID$newID<-paste(ID1$Guild, ID1$Phylum, ID1$Class, ID1$Order, ID1$Family, ID1$Genus, ID1$aa, sep="..__")
+row.names(otu_table)<-ID$newID
+otu_table<-otu_table[ID$Fungi=="Fungi",]
+
+Totutable<-data.frame(t(otu_table))
+Totutable.pseudo.po<-Totutable[tc_map$TP < 7 & tc_map$TP >0 & tc_map$Treatment1 == "Control", ]
+Totutable.pseudo.pr<-Totutable[tc_map$TP < 3 & tc_map$TP >0 & tc_map$Treatment1 == "Control", ]
+otu_table<-data.frame(t(rbind(Totutable, Totutable.pseudo.po, Totutable.pseudo.pr)))
+tc_map.po<-tc_map[tc_map$TP < 7 & tc_map$TP >0 & tc_map$Treatment1 == "Control", ]
+tc_map.po$Treatment1 <- "Post_flowering_drought"
+tc_map.pr<-tc_map[tc_map$TP < 3 & tc_map$TP >0 & tc_map$Treatment1 == "Control", ]
+tc_map.pr$Treatment1 <- "Pre_flowering_drought"
+tc_map<-rbind(tc_map, tc_map.po, tc_map.pr)
+
+fRF<-function (ha, tr) {
+  sub_map = droplevels(tc_map[ tc_map$Habitat== ha & tc_map$Treatment1 == tr ,]) # 
+  idx = rownames(sub_map) %in% colnames(otu_table)
+  sub_map = sub_map[idx,]
+  sub_otu = otu_table[, rownames(sub_map)]  
+  
+  set.seed(315)
+  rf = randomForest(t(sub_otu), sub_map$TP, importance=TRUE, proximity=TRUE, ntree = 1000)
+  print(rf)
+  
+  
+  set.seed(315) 
+  result = rfcv(t(sub_otu), sub_map$TP, cv.fold=10) #Random Forest Cross Validation
+  
+  xx<-data.frame(result$error.cv)
+  xx<-data.frame(row.names(xx),xx)
+  names(xx)<-c("name", "value")
+  
+  nf<-as.numeric(as.character(xx$name[which.min(xx$value)])) # to pick out the no. of OTUs resulting to the best model
+  print(nf)
+  
+  imp= as.data.frame(rf$importance)
+  imp = imp[order(imp[,1],decreasing = T),]
+  write.table(imp,file = "importance_class.txt",quote = F,sep = '\t', row.names = T, col.names = T)
+  
+  imp.all = read.table("importance_class.txt", header=T, row.names= 1, sep="\t") 
+  #head(imp)
+  imp = head(imp.all, n= nf)
+  imp=imp[order(1:nf,decreasing = T),]
+  
+  imp$ID<-row.names(imp)
+  imp$ID1<-row.names(imp)
+  imp.w<-cSplit(imp, "ID", "..__")
+  colnames(imp.w)<-c("X.IncMSE","IncNodePurity","ID1" ,"guild" ,"phylum", "class", "order", "family", "genus","OTU")
+  row.names(imp.w)<-imp.w$ID1
+  #row.names(sub_otu)
+  sub_abu = sub_otu[rownames(imp.w),]
+  row.names(sub_abu)<-paste(imp.w$guild,imp.w$phylum, imp.w$class, imp.w$order, imp.w$family, imp.w$genus,imp.w$OTU, sep="..__")
+  
+  sampFile = as.data.frame(sub_map$TP,row.names = row.names(sub_map))
+  
+  colnames(sampFile)[1] = "group"
+  
+  mat_t = t(sub_abu)
+  mat_t2 = merge(sampFile, mat_t, by="row.names")
+  mat_t2 = mat_t2[,-1]
+  mat_mean = aggregate(mat_t2[,-1], by=mat_t2[1], FUN=mean) # mean
+  
+  otu_norm_group = do.call(rbind, mat_mean)[-1,]
+  colnames(otu_norm_group) = mat_mean$group
+  
+  all.guildlevles<-c("Arbuscular.mycorrhizal","Endophyte","Plant.pathogen","Plant.pathogen_Yeast","Saprotroph","Saprotroph_Yeast", "Unidentified...others" )
+  
+  
+  d2<-all.guildlevles[all.guildlevles%in%imp.w$guild==FALSE]
+  addLevel <- function(x, newlevel=NULL) {
+    if(is.factor(x)) {
+      if (is.na(match(newlevel, levels(x))))
+        return(factor(x, levels=c(levels(x), newlevel)))
+    }
+    return(x)
+  }
+  
+  
+  imp.w$guild<-addLevel(imp.w$guild, d2)
+  imp.w$guild<-factor(imp.w$guild, 
+                      levels = c("Arbuscular.mycorrhizal","Endophyte","Plant.pathogen","Plant.pathogen_Yeast","Saprotroph","Saprotroph_Yeast", "Unidentified...others" ),
+                      labels = c("Arbuscular mycorrhiza", "Endophyte", "Plant pathogen", "Plant pathogen (Yeast)", "Saprotroph", "Saprotroph (Yeast)", "Others"))
+  
+  
+  mat_row <- data.frame(row.names = row.names (otu_norm_group),Guild = imp.w$guild)
+  #mat_row$Guild
+  #levels(imp.w$guild)
+  #levels(imp.w$guild)
+  mycolors <- c("#0000FF","#FF3399","#FFCC33","#ff00ff","#00ff00", "deepskyblue", "bisque")
+  
+  names(mycolors) <- levels(mat_row$Guild)
+  
+  mycolors <- list(Guild = mycolors)
+  
+  pheatmap(otu_norm_group,
+           scale="row", 
+           annotation_row = mat_row,
+           annotation_colors = mycolors,
+           show_rownames  = F,
+           cluster_cols = F,
+           legend = F,
+           cluster_rows = T)
+  
+}
+
+fRF("Leaf","Control")
+fRF("Root","Control")
+#fRF("Rhizosphere","Control")
+fRF("Soil","Control")
+
+```
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 8, fig.width = 5, fig.align = "center"}
+fRF<-function (ha, tr) {
+  ha<-"Rhizosphere"
+  tr<-"Control"
+  sub_map = droplevels(tc_map[ tc_map$Habitat== ha & tc_map$Treatment1 == tr ,]) # 
+  idx = rownames(sub_map) %in% colnames(otu_table)
+  sub_map = sub_map[idx,]
+  sub_otu = otu_table[, rownames(sub_map)]  
+  
+  set.seed(315)
+  rf = randomForest(t(sub_otu), sub_map$TP, importance=TRUE, proximity=TRUE, ntree = 1000)
+  print(rf)
+  
+  
+  set.seed(315) 
+  result = rfcv(t(sub_otu), sub_map$TP, cv.fold=10) #Random Forest Cross Validation
+  
+  xx<-data.frame(result$error.cv)
+  xx<-data.frame(row.names(xx),xx)
+  names(xx)<-c("name", "value")
+  
+  nf<-as.numeric(as.character(xx$name[which.min(xx$value)])) # to pick out the no. of OTUs resulting to the best model
+  print(nf)
+  
+  imp= as.data.frame(rf$importance)
+  imp = imp[order(imp[,1],decreasing = T),]
+  write.table(imp,file = "importance_class.txt",quote = F,sep = '\t', row.names = T, col.names = T)
+  
+  imp.all = read.table("importance_class.txt", header=T, row.names= 1, sep="\t") 
+  #head(imp)
+  imp = head(imp.all, n= nf)
+  imp=imp[order(1:nf,decreasing = T),]
+  
+  imp$ID<-row.names(imp)
+  imp$ID1<-row.names(imp)
+  imp.w<-cSplit(imp, "ID", "..__")
+  colnames(imp.w)<-c("X.IncMSE","IncNodePurity","ID1" ,"guild" ,"phylum", "class", "order", "family", "genus","OTU")
+  row.names(imp.w)<-imp.w$ID1
+  #row.names(sub_otu)
+  sub_abu = sub_otu[rownames(imp.w),]
+  row.names(sub_abu)<-paste(imp.w$guild,imp.w$phylum, imp.w$class, imp.w$order, imp.w$family, imp.w$genus,imp.w$OTU, sep="..__")
+  
+  sampFile = as.data.frame(sub_map$TP,row.names = row.names(sub_map))
+  
+  colnames(sampFile)[1] = "group"
+  
+  mat_t = t(sub_abu)
+  mat_t2 = merge(sampFile, mat_t, by="row.names")
+  mat_t2 = mat_t2[,-1]
+  mat_mean = aggregate(mat_t2[,-1], by=mat_t2[1], FUN=mean) # mean
+  
+  otu_norm_group = do.call(rbind, mat_mean)[-1,]
+  colnames(otu_norm_group) = mat_mean$group
+  
+  all.guildlevles<-c("Arbuscular.mycorrhizal","Endophyte","Plant.pathogen","Plant.pathogen_Yeast","Saprotroph","Saprotroph_Yeast", "Unidentified...others" )
+  
+  imp.w$guild<-factor(imp.w$guild, 
+                      levels = c("Arbuscular.mycorrhizal","Endophyte","Plant.pathogen","Plant.pathogen_Yeast","Saprotroph","Saprotroph_Yeast", "Unidentified...others" ),
+                      labels = c("Arbuscular mycorrhiza", "Endophyte", "Plant pathogen", "Plant pathogen (Yeast)", "Saprotroph", "Saprotroph (Yeast)", "Others"))
+  
+  
+  mat_row <- data.frame(row.names = row.names (otu_norm_group),Guild = imp.w$guild)
+  #mat_row$Guild
+  #levels(imp.w$guild)
+  #levels(imp.w$guild)
+  mycolors <- c("#0000FF","#FF3399","#FFCC33","#ff00ff","#00ff00", "deepskyblue", "bisque")
+  
+  names(mycolors) <- levels(mat_row$Guild)
+  
+  mycolors <- list(Guild = mycolors)
+  
+  pheatmap(otu_norm_group,
+           scale="row", 
+           annotation_row = mat_row,
+           annotation_colors = mycolors,
+           show_rownames  = F,
+           cluster_cols = F,
+           legend = F,
+           cluster_rows = T)
+  
+}
+
+fRF("Rhizosphere","Control")
+```
+

@@ -1,0 +1,223 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/10/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 5, fig.align = "center"}
+setwd("/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi")
+library(reshape2)
+library(ggplot2)
+library(MASS)
+library(splitstackshape)
+library(colorRamps)
+library(vegan)
+#library(picante)
+library(MASS)
+#library(compositions)
+#library(zCompositions)
+#library(ggrepel)
+library(betapart)
+#source("chunk/codaSeq_functions.R")
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+
+habitat<-"Leaf"
+
+hmap<-function(habitat){
+ha<-env$Habitat==habitat & env$TP>2 & env$Treatment1!="Post_flowering_drought"
+fung.h<-fung[ha,]
+env.h<-env[ha,]
+var<-droplevels(interaction(  env.h$Timepiont, env.h$Treatment1 ))
+fung.agg<-data.frame(aggregate(fung.h,by=list(var) , sum))
+rownames(fung.agg)<-fung.agg[,1]
+fungx<-fung.agg[,-1]
+fungx[fungx>0]=1 
+fd<-beta.pair(fungx, index.family = "jaccard")
+bc<-fd$beta.jtu
+#bc<-vegdist(fung.agg[,-1])
+bc<-as.matrix(bc)
+bc <- get_upper_tri(bc)
+bc.melted<-melt(bc, varnames = c("row", "col"), na.rm = TRUE)
+bc.melted$row1<-bc.melted$row
+bc.melted$col1<-bc.melted$col
+bc.melted<-cSplit(bc.melted, "row1", ".")
+bc.melted<-cSplit(bc.melted, "col1", ".")
+bc.melted<-bc.melted[bc.melted$row1_2!=bc.melted$col1_2,]
+bc.melted$row1_1<-as.numeric(gsub("TP", "" , bc.melted$row1_1))
+bc.melted$col1_1<-as.numeric(gsub("TP", "" , bc.melted$col1_1))
+p1<-ggplot(data = bc.melted, aes(y=row1_1, x=col1_1, fill=value)) + 
+  geom_tile()+
+  scale_fill_gradient(low = "green", high = "brown", limits=c(0.1,0.9)) + theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = "Turnover") + theme(panel.background = element_rect(fill = NA))+labs(y = "Control", x = "Pre-flowering drought")+
+  geom_abline(slope =1, colour ="white", linetype="dashed")+
+  geom_vline(aes(xintercept=8.99), colour="blue", linetype="dashed")+
+  geom_vline(aes(xintercept=12), colour="green", linetype="dashed")+
+  geom_hline(aes(yintercept=9.5), colour="green", linetype="dashed") + 
+  theme(legend.position = "none", legend.direction = "horizontal", axis.title = element_text(size = 12,face = "bold"),
+        axis.text = element_text(size = 12,face = "bold", colour = "gray0"),
+        legend.text = element_text(size = 8,face = "bold"), 
+        legend.title = element_text(size = 12,face = "bold.italic"))
+print(p1)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+# Control
+ha<- env$Habitat==habitat
+fung<-fung[env$Treatment1=="Control" & ha,]
+env<-env[env$Treatment1=="Control"& ha,]
+#var<-droplevels(interaction( env$Timepiont,env$Habitat))
+var<-droplevels(env$Timepiont)
+fung.agg<-data.frame(aggregate(fung,by=list(var) , sum))
+rownames(fung.agg)<-fung.agg[,1]
+#bc<-vegdist(fung.agg[,-1])
+fungx<-fung.agg[,-1]
+fungx[fungx>0]=1 
+fd<-beta.pair(fungx, index.family = "jaccard")
+bc<-fd$beta.jtu
+bc<-as.matrix(bc)
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+bc <- get_upper_tri(bc)
+bc.melted<-melt(bc, varnames = c("row", "col"), na.rm = TRUE)
+bc.melted<-bc.melted[bc.melted$row!=bc.melted$col,]
+bc.melted$row<-as.numeric(gsub("TP", "" , bc.melted$row))
+bc.melted$col<-as.numeric(gsub("TP", "" , bc.melted$col))
+p2<-ggplot(data = bc.melted, aes(x=row,y=col, fill=value)) + 
+  geom_tile()+
+  scale_fill_gradient(low = "green", high = "brown", limits=c(0.1,0.9)) + theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = "Turnover") + theme(panel.background = element_rect(fill = NA))+labs(y = "Control", x = "Control")+
+  geom_abline(slope =1, colour ="white", linetype="dashed")+ theme(legend.position = "none", legend.direction = "horizontal")+ 
+  theme(legend.position = "none", legend.direction = "horizontal", axis.title = element_text(size = 12,face = "bold"),
+        axis.text = element_text(size = 12,face = "bold", colour = "gray0"),
+        legend.text = element_text(size = 8,face = "bold"), 
+        legend.title = element_text(size = 12,face = "bold.italic"))
+print(p2)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+# Pre-flowering drought
+ha<- env$Habitat==habitat
+fung<-fung[env$Treatment1=="Pre_flowering_drought" & ha,]
+env<-env[env$Treatment1=="Pre_flowering_drought"& ha,]
+#var<-droplevels(interaction( env$Timepiont,env$Habitat))
+var<-droplevels(env$Timepiont)
+fung.agg<-data.frame(aggregate(fung,by=list(var) , sum))
+rownames(fung.agg)<-fung.agg[,1]
+#bc<-vegdist(fung.agg[,-1])
+fungx<-fung.agg[,-1]
+fungx[fungx>0]=1 
+fd<-beta.pair(fungx, index.family = "jaccard")
+bc<-fd$beta.jtu
+bc<-as.matrix(bc)
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+bc <- get_upper_tri(bc)
+bc.melted<-melt(bc, varnames = c("row", "col"), na.rm = TRUE)
+bc.melted<-bc.melted[bc.melted$row!=bc.melted$col,]
+bc.melted$row<-as.numeric(gsub("TP", "" , bc.melted$row))
+bc.melted$col<-as.numeric(gsub("TP", "" , bc.melted$col))
+p3<-ggplot(data = bc.melted, aes(x=row,y=col, fill=value)) + 
+  geom_tile()+
+  scale_fill_gradient(low = "green", high = "brown", limits=c(0.1,0.9)) + theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = "Turnover") + theme(panel.background = element_rect(fill = NA))+labs(y = "Pre_flowering_drought", x = "Pre_flowering_drought")+
+  geom_abline(slope =1, colour ="white", linetype="dashed")+ theme(legend.position = "none", legend.direction = "horizontal")+ 
+  theme(legend.position = "none", legend.direction = "horizontal", axis.title = element_text(size = 12,face = "bold"),
+        axis.text = element_text(size = 12,face = "bold", colour = "gray0"),
+        legend.text = element_text(size = 8,face = "bold"), 
+        legend.title = element_text(size = 12,face = "bold.italic"))
+print(p3)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+# Control- Post-flowering drought
+ha<-env$Habitat==habitat & env$TP>9 & env$Treatment1!="Pre_flowering_drought"
+fung.h<-fung[ha,]
+env.h<-env[ha,]
+var<-droplevels(interaction(  env.h$Timepiont, env.h$Treatment1 ))
+fung.agg<-data.frame(aggregate(fung.h,by=list(var) , sum))
+rownames(fung.agg)<-fung.agg[,1]
+#bc<-vegdist(fung.agg[,-1])
+fungx<-fung.agg[,-1]
+fungx[fungx>0]=1 
+fd<-beta.pair(fungx, index.family = "jaccard")
+bc<-fd$beta.jtu
+#bc<-vegdist(fung.agg[,-1])
+bc<-as.matrix(bc)
+bc <- get_upper_tri(bc)
+bc.melted<-melt(bc, varnames = c("row", "col"), na.rm = TRUE)
+bc.melted$row1<-bc.melted$row
+bc.melted$col1<-bc.melted$col
+bc.melted<-cSplit(bc.melted, "row1", ".")
+bc.melted<-cSplit(bc.melted, "col1", ".")
+bc.melted<-bc.melted[bc.melted$row1_2!=bc.melted$col1_2,]
+bc.melted$row1_1<-as.numeric(gsub("TP", "" , bc.melted$row1_1))
+bc.melted$col1_1<-as.numeric(gsub("TP", "" , bc.melted$col1_1))
+p4<-ggplot(data = bc.melted, aes(y=row1_1, x=col1_1, fill=value)) + 
+  geom_tile()+
+  scale_fill_gradient(low = "green", high = "brown", limits=c(0.1,0.9)) + theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = "Turnover") + theme(panel.background = element_rect(fill = NA))+labs(y = "Control", x = "Post-flowering drought")+
+  geom_abline(slope =1, colour ="white", linetype="dashed")+
+  theme(legend.position = "none", legend.direction = "horizontal", axis.title = element_text(size = 12,face = "bold"),
+        axis.text = element_text(size = 12,face = "bold", colour = "gray0"),
+        legend.text = element_text(size = 8,face = "bold"), 
+        legend.title = element_text(size = 12,face = "bold.italic"))
+print(p4)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ghost.2019.03.17.Rdata")
+# Post-flowering drought
+ha<- env$Habitat==habitat
+fung<-fung[env$Treatment1=="Post_flowering_drought" & ha,]
+env<-env[env$Treatment1=="Post_flowering_drought"& ha,]
+#var<-droplevels(interaction( env$Timepiont,env$Habitat))
+var<-droplevels(env$Timepiont)
+fung.agg<-data.frame(aggregate(fung,by=list(var) , sum))
+rownames(fung.agg)<-fung.agg[,1]
+#bc<-vegdist(fung.agg[,-1])
+fungx<-fung.agg[,-1]
+fungx[fungx>0]=1 
+fd<-beta.pair(fungx, index.family = "jaccard")
+bc<-fd$beta.jtu
+bc<-as.matrix(bc)
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+bc <- get_upper_tri(bc)
+bc.melted<-melt(bc, varnames = c("row", "col"), na.rm = TRUE)
+bc.melted<-bc.melted[bc.melted$row!=bc.melted$col,]
+
+bc.melted$row<-as.numeric(gsub("TP", "" , bc.melted$row))
+bc.melted$col<-as.numeric(gsub("TP", "" , bc.melted$col))
+p5<-ggplot(data = bc.melted, aes(x=row,y=col, fill=value)) + 
+  geom_tile()+
+  scale_fill_gradient(low = "green", high = "brown", limits=c(0.1,0.9)) + theme(axis.text.x = element_text(angle = 90)) +
+  labs(fill = "Turnover") + theme(panel.background = element_rect(fill = NA))+labs(y = "Post_flowering_drought", x = "Post_flowering_drought")+
+  geom_abline(slope =1, colour ="white", linetype="dashed")+ theme(legend.position = "none", legend.direction = "horizontal")+ 
+  theme(legend.position = "none", legend.direction = "horizontal", axis.title = element_text(size = 12,face = "bold"),
+        axis.text = element_text(size = 12,face = "bold", colour = "gray0"),
+        legend.text = element_text(size = 8,face = "bold"), 
+        legend.title = element_text(size = 12,face = "bold.italic"))
+
+print(p5)
+}
+
+
+hmap("Leaf")
+hmap("Root")
+hmap("Rhizosphere")
+hmap("Soil")
+
+```
+

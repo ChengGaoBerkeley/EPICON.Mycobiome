@@ -1,0 +1,45 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/3/2019"
+output: html_document
+---
+
+```{r,  fig.height = 8, fig.width = 6, fig.align = "center"}
+
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+library(ggplot2)
+
+
+rm(list = ls())
+rm(list = ls())
+
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+
+Lagg$Habitat<-factor(Lagg$Habitat, levels = c("Leaf", "Root", "Rhizosphere", "Soil"))
+Lagg$Treatment<-factor(Lagg$Treatment, levels = c("Control", "Pre_flowering_drought", "Post_flowering_drought"))
+
+
+summary(lm(AIC * -1 ~ TP, data = Lagg[Lagg$Habitat=="Leaf",]))
+summary(lm(AIC * -1 ~ TP, data = Lagg[Lagg$Habitat=="Root",]))
+summary(lm(AIC * -1 ~ TP, data = Lagg[Lagg$Habitat=="Rhizosphere",]))
+summary(lm(AIC * -1 ~ TP, data = Lagg[Lagg$Habitat=="Soil",]))
+
+ggplot() + geom_point(data=Lagg,aes(x= TP , y= AIC * -1, colour= Treatment ),size=2) + 
+  geom_smooth(data=Lagg,aes(x= TP , y=AIC * -1), colour = "purple")+
+  labs(x = "Week",y = "SNCM (-AIC)")+
+  scale_colour_manual(values=c("black","blue", "red"))+theme_bw()+
+  facet_wrap(~Habitat, nrow = 4)+
+  theme(strip.text.x = element_text(size = 14,face="bold"),axis.text=element_text(size=12,face="bold"),axis.title=element_text(size=14,face="bold"))
+
+
+### Fst   # curve fitting is not applicable due to the heteroskedasticity of residuals
+
+ggplot() + geom_point(data=Lagg,aes(x= TP , y= Fst , colour= Treatment ),size=2) + 
+  labs(x = "Week",y = "Fst")+
+  scale_colour_manual(values=c("black","blue", "red"))+theme_bw()+
+  facet_wrap(~Habitat, nrow = 4)+
+  theme(strip.text.x = element_text(size = 14,face="bold"),axis.text=element_text(size=12,face="bold"),axis.title=element_text(size=14,face="bold"))
+```
+

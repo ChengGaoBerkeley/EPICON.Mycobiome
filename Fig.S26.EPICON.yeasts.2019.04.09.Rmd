@@ -1,0 +1,33 @@
+---
+title: "Untitled"
+author: "Cheng Gao"
+date: "4/9/2019"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE, fig.height = 4, fig.width = 10, fig.align = "center"}
+wd<- "/Users/chengg/Google Drive/EPICON/Mycobiome/Fungal ITS/statistic/Total.fungi"
+setwd(wd)
+
+rm(list = ls())
+load("EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata")
+library(vegan)
+library(ggplot2)
+
+fung.rart<-t(fung.rar)
+yeast.rart<-fung.rart[ID$Guild=="Plant pathogen_Yeast" |ID$Guild=="Saprotroph_Yeast",]
+
+env$yeasts<-colSums(yeast.rart)
+env$Treatment1<-factor(env$Treatment1, levels = c("Control", "Pre_flowering_drought", "Post_flowering_drought"))
+ggplot(data=env[env$Habitat=="Leaf",])+
+  labs(x="Week", y="Relative abundance of Yeasts")+
+  geom_smooth(aes(x = TP, y = (yeasts/362), color = Treatment1))+
+  scale_color_manual(values = c("black", "blue", "red"))+
+  theme_bw()+
+  labs(colour="Drought treatment")+
+  theme(legend.title = element_text(colour="black", size=15, face="bold"),
+        legend.text = element_text(colour="black", size=15, face="bold"),
+        axis.text=element_text(size=10,face="bold"),
+        axis.title=element_text(size=15,face="bold"))
+```
+
