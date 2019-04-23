@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ktImportText S0.guild.txt >unplantedsoil.html
