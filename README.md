@@ -1,6 +1,6 @@
 # EPICON.Mycobiome
 
-The codes were used in the analysis of Fungal community data generated from EPICON project.
+The codes were used in the analysis of Mycobiome data generated from EPICON project.
 
 EPICON is a DOE funded project aimed at understanding responses of sorghum to drought, from host gene expression to host-associated microbiome.
 
