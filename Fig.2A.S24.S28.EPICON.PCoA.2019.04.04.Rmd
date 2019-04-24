@@ -40,7 +40,7 @@ df <- envpc[,c("Axis.1", "Axis.2", "Habitat")]
 find_hull <- function(envpc) envpc[chull(envpc$Axis.1, envpc$Axis.2), ]
 hulls <- ddply(df, "Habitat", find_hull)
 
-p1<-ggplot(data=envpc, aes(x= Axis.1 , y= Axis.2,group=Habitat))+ 
+p1<-ggplot(data=envpc, aes(x= Axis.1 * -1 , y= Axis.2 * -1,group=Habitat))+ 
   geom_point(aes(shape=Habitat, colour=factor(TP)),size=2) + 
   geom_polygon(data=hulls, alpha=.1)+
   labs(x = sprintf("PCo1 (%.1f%%)", pc1), y = sprintf("PCo2 (%.1f%%)", pc2))+
@@ -57,7 +57,7 @@ ggplotly(p1)
 
 library(plotly)
 
-plot_ly(x=envpc$Axis.1, y=envpc$Axis.2, z=envpc$Axis.3, type="scatter3d", mode="markers", color=envpc$Habitat)
+plot_ly(x=envpc$Axis.1 * -1, y=envpc$Axis.2 * -1, z=envpc$Axis.3, type="scatter3d", mode="markers", color=envpc$Habitat)
 
 ```
 
