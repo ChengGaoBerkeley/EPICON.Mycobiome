@@ -2,7 +2,7 @@
 
 The codes were used in the analysis of Mycobiome data generated from EPICON project.
 
-EPICON is a DOE funded project aimed at understanding responses of sorghum to drought, from host gene expression to host-associated microbiome.
+EPICON is a DOE funded project conceived of by Peggy G. Lemaux, Devin Coleman-Derr, Elizabeth Purdom, John Vogel, Jeffery A. Dahlberg and John W. Taylor, with Peggy G. Lemaux as director. EPICON aimed at understanding responses of sorghum to drought, from host gene expression to host-associated microbiome.
 
 
 
