@@ -1,4 +1,9 @@
 # EPICON.Mycobiome
+# Contact: Cheng Gao
+# University of California Berkeley
+# email: chengg@berkeley.edu / gaochengaob@126.com
+# twitter: @chenggucb
+######  ###### ########
 
 The codes were used in the analysis of Mycobiome data generated from EPICON project.
 
