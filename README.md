@@ -6,13 +6,13 @@ EPICON is a DOE funded project conceived of by Peggy G. Lemaux, Devin Coleman-De
 
 For detailed descriptions of experimental design, please see associated publications:
 
-            Gao et al Fungal community assembly: Drift, selection, drought-stress, and universal ecological dynamics Nature Communications 2019 (Accepted)
+            Gao et al Nature Communications 2019 Fungal community assembly: Drift, selection, drought-stress, and universal ecological dynamics  (Accepted)
       
-            Gao et al Strong succession in arbuscular mycorrhizal fungal communities ISMEJ 2019 https://www.nature.com/articles/s41396-018-0264-0 
+            Gao et al ISMEJ 2019 Strong succession in arbuscular mycorrhizal fungal communities  https://www.nature.com/articles/s41396-018-0264-0 
             
-            Varoquaux#, Cole#, Gao# et al Transcriptomic analysis of field-droughted sorghum from seedling to maturity reveals biotic and metabolic responses PNAS 2019 www.pnas.org/cgi/doi/10.1073/pnas.1907500116
+            Varoquaux#, Cole#, Gao# et al PNAS 2019 Transcriptomic analysis of field-droughted sorghum from seedling to maturity reveals biotic and metabolic responses  www.pnas.org/cgi/doi/10.1073/pnas.1907500116
             
-            Xu et al Drought delays development of the sorghum root microbiome and enriches for monoderm bacteria PNAS 2018 https://www.pnas.org/content/115/18/E4284
+            Xu et al PNAS 2018 Drought delays development of the sorghum root microbiome and enriches for monoderm bacteria  https://www.pnas.org/content/115/18/E4284
 
 
 
