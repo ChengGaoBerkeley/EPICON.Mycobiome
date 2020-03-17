@@ -11,7 +11,7 @@ EPICON is a DOE funded project conceived of by Peggy G. Lemaux, Devin Coleman-De
 
 For detailed descriptions of experimental design, please see associated publications:
 
-            Gao et al Nature Communications 2019 Fungal community assembly in drought stressed sorghum shows stochasticity, selection, and universal ecological dynamics (Accepted)
+            Gao et al Nature Communications 2020 Fungal community assembly in drought stressed sorghum shows stochasticity, selection, and universal ecological dynamics https://www.nature.com/articles/s41467-019-13913-9
       
             Gao et al ISMEJ 2019 Strong succession in arbuscular mycorrhizal fungal communities  https://www.nature.com/articles/s41396-018-0264-0 
             
