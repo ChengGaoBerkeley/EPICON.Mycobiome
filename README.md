@@ -55,4 +55,4 @@ Fungal community assembly was explored by:
 
 Here is the link for the dataset EPICON.data.preparation.RC.bNTI.ted.2019.04.19.Rdata : https://drive.google.com/file/d/1A6xcn28-HB5oaA8tCdlTiGIuVb8Irx8e/view?usp=sharing
 
-
+Here is the link for the dataset EPICON.DOC.2018.05.24.Rdata : https://drive.google.com/file/d/1It71FSp8KDC2-UlcjsKfH4MhBe3Mc1gR/view?usp=sharing
