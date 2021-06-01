@@ -1,7 +1,7 @@
 # EPICON.Mycobiome
 # Contact: Cheng Gao
 # University of California Berkeley
-# email: chengg@berkeley.edu / gaochengaob@126.com
+# email: gaochengaob@126.com
 # twitter: @chenggucb
 ######  ###### ########
 
